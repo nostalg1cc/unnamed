@@ -12,7 +12,7 @@
         <!-- Sidebar: DM List & User Panel -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <button id="initiate-new-chat-sidebar-button" class="button-primary">New Chat / Connect</button>
+                <button id="initiate-new-chat-sidebar-button" class="button-primary" title="New Chat / Connect">+</button>
             </div>
             <div class="dm-list">
                 <div class="dm-item active-dm" id="current-chat-dm-item" style="display:none;">
@@ -114,7 +114,8 @@
                         <span id="chat-partner-name-header">Chat with Peer</span>
                     </div>
                     <div class="chat-header-actions">
-                        <button id="start-voice-call-button" class="header-button" title="Start Voice Call" style="display:none;">📞</button> <!-- Initially hidden -->
+                        <button id="set-nickname-button" class="header-button" title="Set Nickname" style="display:none;">✏️</button>
+                        <button id="start-voice-call-button" class="header-button" title="Start Voice Call" style="display:none;">📞</button>
                         <button id="export-chat-button" class="header-button" title="Export Chat History">💾</button>
                         <button id="disconnect-chat-button" class="header-button" title="Disconnect Chat">❌</button>
                     </div>
@@ -123,6 +124,8 @@
                     <!-- Messages will appear here -->
                 </div>
                 <div class="message-input-box">
+                    <button id="attach-file-button" class="attach-button" title="Attach File">📎</button>
+                    <input type="file" id="media-file-input" class="hidden-file-input" accept="image/*,video/*">
                     <input type="text" id="message-input" placeholder="Type a message...">
                     <button id="send-message-button" class="send-button" title="Send Message">➢</button>
                 </div>

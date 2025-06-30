@@ -112,10 +112,28 @@ body {
 }
 
 #initiate-new-chat-sidebar-button {
-    width: auto; /* Allow button to size to content or be styled as icon */
-    padding: 8px 10px; /* Adjust if it becomes an icon button */
-    font-size: var(--font-size-button);
-    /* If using an icon, text might be hidden or replaced by icon font/SVG */
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font-size: 1.75rem; /* Make the '+' larger */
+    line-height: 38px; /* Adjust for vertical centering of '+' */
+    text-align: center;
+    border-radius: 25%; /* Squircle */
+    margin: auto; /* Center in sidebar-header if it's flex */
+    font-weight: 300; /* Lighter plus sign */
+    color: var(--text-normal); /* Ensure good contrast on primary-accent bg */
+}
+#initiate-new-chat-sidebar-button:hover {
+    background-color: var(--primary-accent-hover); /* Use hover color */
+}
+
+
+.sidebar-header { /* Ensure this centers the button */
+    padding: 10px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .dm-list {
@@ -537,6 +555,20 @@ body {
     flex-shrink: 0;
     align-items: center;
 }
+.attach-button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.3rem;
+    padding: 0 10px 0 0; /* Right padding to space from input */
+    cursor: pointer;
+    line-height: 1;
+    align-self: center;
+}
+.attach-button:hover {
+    color: var(--primary-accent);
+}
+
 #message-input {
     flex-grow: 1;
     padding: 10px 12px;
