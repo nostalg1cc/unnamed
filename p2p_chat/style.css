@@ -1,0 +1,229 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+    color: #1c1e21;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0 20px 20px 20px; /* No top padding, header handles it */
+}
+
+header {
+    background-color: #007bff;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    margin: 0 -20px 20px -20px; /* Extend to container edges */
+    border-top-left-radius: 8px; /* Match container if it were not full width */
+    border-top-right-radius: 8px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.card {
+    background-color: #ffffff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+    border: 1px solid #dddfe2;
+}
+
+h2 {
+    color: #007bff;
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 20px;
+}
+h3 {
+    color: #1c1e21;
+    font-size: 18px;
+    margin-bottom:10px;
+}
+h4 {
+    color: #333;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #4b4f56;
+    font-size: 14px;
+}
+
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccd0d5;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    line-height: 1.4;
+}
+
+textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+button {
+    padding: 10px 18px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+button:active {
+    background-color: #004085;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+
+button:disabled {
+    background-color: #a0c7e4;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+hr { /* Using borders on sections/cards instead of many hrs */
+    display: none;
+}
+
+#user-profile-section strong {
+    color: #1c1e21;
+    font-weight: normal; /* Label is bold, value is normal */
+}
+
+#setup-profile {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+#signaling-exchange-area {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+#signaling-exchange-area p {
+    font-weight: bold;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    font-size:0.9em;
+}
+#signaling-exchange-area textarea,
+#signaling-exchange-area input[type="text"] {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    background-color: #fff;
+    font-size: 0.9em;
+}
+
+#messages-area {
+    height: 280px;
+    border: 1px solid #ccd0d5;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 15px;
+    overflow-y: auto;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+}
+
+.message {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    border-radius: 18px;
+    max-width: 75%;
+    word-wrap: break-word;
+    line-height: 1.4;
+}
+
+.message.self {
+    background-color: #007bff;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+
+.message.peer {
+    background-color: #e4e6eb;
+    color: #050505;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+#message-input-area {
+    display: flex;
+    align-items: center;
+}
+
+#message-input {
+    flex-grow: 1;
+    margin-right: 10px;
+    margin-bottom: 0;
+}
+
+#disconnect-peer-button {
+    background-color: #ef4444; /* Tailwind red-500 */
+    margin-left: 10px;
+}
+#disconnect-peer-button:hover {
+    background-color: #dc2626; /* Tailwind red-600 */
+}
+
+#requests-list .request-item {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#requests-list .request-item:last-child {
+    border-bottom: none;
+}
+#requests-list button {
+    margin-left: 10px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+.accept-request-button {
+    background-color: #28a745; /* Green */
+}
+.accept-request-button:hover {
+    background-color: #218838;
+}
+.deny-request-button {
+    background-color: #dc3545; /* Red */
+}
+.deny-request-button:hover {
+    background-color: #c82333;
+}

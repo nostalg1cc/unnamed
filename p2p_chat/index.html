@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!--
+        More permissive CSP for development ease, especially with WebRTC signaling data that might be dynamically handled.
+        Ideally, for production, this would be tightened.
+        'unsafe-inline' for styles is often acceptable if not using external CSS frameworks that inject them.
+        'unsafe-eval' might be needed by some WebRTC libraries or for dynamic code, but should be avoided if possible.
+        For now, let's keep it relatively simple.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ws: wss:;">
+    <title>P2P Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>P2P Chat</h1>
+        </header>
+
+        <section id="user-profile-section" class="card">
+            <h2>Your Profile</h2>
+            <p>Display Name: <strong id="display-name-output">Not set</strong></p>
+            <p>User ID: <strong id="user-id-output">Not set</strong></p>
+            <div id="setup-profile">
+                <label for="display-name-input">Set your Display Name:</label>
+                <input type="text" id="display-name-input" placeholder="Enter display name">
+                <button id="save-profile-button">Save Profile & Get ID</button>
+            </div>
+        </section>
+
+        <hr>
+
+        <section id="p2p-management-section" class="card">
+            <h2>P2P Connection Management</h2>
+            <div id="initiate-chat-div">
+                <h3>Initiate Chat</h3>
+                <label for="peer-id-input">Peer's User ID:</label>
+                <input type="text" id="peer-id-input" placeholder="Enter peer's User ID">
+                <button id="connect-peer-button">Request Chat</button>
+            </div>
+
+            <!-- For manual signaling exchange -->
+            <div id="signaling-exchange-area" style="display: none;">
+                <h4>Signaling Data Exchange (Manual Copy/Paste)</h4>
+                <p><strong>Step 1: Send your Offer to Peer</strong></p>
+                <label for="offer-sdp-output">Your Offer SDP (copy and send to peer):</label>
+                <textarea id="offer-sdp-output" rows="4" readonly placeholder="WebRTC offer will appear here..."></textarea>
+
+                <p><strong>Step 2: Receive Peer's Answer</strong></p>
+                <label for="answer-sdp-input">Peer's Answer SDP (paste from peer):</label>
+                <textarea id="answer-sdp-input" rows="4" placeholder="Paste peer's answer SDP here..."></textarea>
+                <button id="submit-answer-sdp-button">Submit Peer's Answer</button>
+
+                <p><strong>Step 3: Exchange ICE Candidates (Both ways)</strong></p>
+                <label for="local-ice-candidates-output">Your ICE Candidates (copy and send to peer as they appear):</label>
+                <textarea id="local-ice-candidates-output" rows="4" readonly placeholder="Your new ICE candidates for the peer..."></textarea>
+                <br>
+                <label for="remote-ice-candidate-input">Peer's ICE Candidate (paste from peer):</label>
+                <input type="text" id="remote-ice-candidate-input" placeholder="Paste one ICE candidate string from peer">
+                <button id="add-remote-ice-candidate-button">Add Peer's ICE Candidate</button>
+            </div>
+        </section>
+
+        <hr>
+
+        <section id="chat-requests-section" class="card" style="display: none;">
+            <h2>Incoming Chat Requests</h2>
+            <div id="requests-list">
+                <!-- e.g., <div>Peer [PeerID] wants to chat. <button class="accept-request" data-peer-id="[PeerID]">Accept</button> <button class="deny-request" data-peer-id="[PeerID]">Deny</button></div> -->
+                <!-- This will be populated dynamically when an offer is received -->
+            </div>
+        </section>
+
+        <hr>
+
+        <section id="active-chat-section" class="card" style="display: none;">
+            <h2>Chat with <span id="chat-partner-id-display">Peer</span></h2>
+            <div id="messages-area">
+                <!-- Messages will appear here. e.g. <div class="message self">Hi</div> <div class="message peer">Hello</div> -->
+            </div>
+            <div id="message-input-area">
+                <input type="text" id="message-input" placeholder="Type your message...">
+                <button id="send-message-button">Send</button>
+                <button id="export-chat-button" style="display: none; background-color: #17a2b8;">Export Chat</button>
+                <button id="disconnect-peer-button" style="display: none;">Disconnect</button>
+            </div>
+        </section>
+
+    </div> <!-- end .container -->
+
+    <script src="./renderer.js"></script>
+</body>
+</html>
