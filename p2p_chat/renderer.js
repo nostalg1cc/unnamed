@@ -1,12 +1,23 @@
 // p2p_chat/renderer.js
 
-let SimplePeer;
-if (window.electronAPI && window.electronAPI.SimplePeer) {
-    SimplePeer = window.electronAPI.SimplePeer;
-    console.log("SimplePeer loaded via preload.js in renderer");
+// SimplePeer is expected to be loaded globally from a CDN script tag in index.html
+// We will declare SimplePeer here so it's in the module scope, but it's assigned by the global script.
+let SimplePeer = window.SimplePeer; // Assign directly from global scope
+
+if (typeof SimplePeer === 'undefined') {
+    console.error("SimplePeer is not loaded! Make sure the CDN script tag is in index.html and loaded correctly before renderer.js.");
+    alert("Critical component SimplePeer could not be loaded. P2P functionality will be unavailable. Please check the browser console for errors related to SimplePeer CDN loading.");
+    // Application may not function correctly beyond this point.
+    // To prevent further errors if SimplePeer is absolutely critical from the start:
+    // throw new Error("SimplePeer is not available.");
 } else {
-    console.error("SimplePeer not found on window.electronAPI. Check preload.js exposure.");
-    alert("Critical component SimplePeer could not be loaded. P2P functionality will be unavailable. Ensure preload.js is correctly exposing SimplePeer.");
+    console.log("SimplePeer assigned from global scope (presumably from CDN).");
+    // Check if SimplePeer object has a version or a clear indicator it's the correct library
+    if (SimplePeer.WEBRTC_SUPPORT) { // simple-peer has this static property
+        console.log("SimplePeer WEBRTC_SUPPORT detected. Version:", SimplePeer.VERSION);
+    } else {
+        console.warn("SimplePeer loaded, but it might not be the expected library (missing WEBRTC_SUPPORT property).");
+    }
 }
 
 const USER_PROFILE_KEY = 'p2pChatUserProfile';

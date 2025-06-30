@@ -2,9 +2,9 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <!-- CSP: Allow self, inline styles for convenience, data URI for fonts if needed by a CSS framework -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:;">
-    <title>P2P Discord-Lite</title>
+    <!-- CSP: Allow self, inline styles, data URIs, and script from bundle.run -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://bundle.run; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:;">
+    <title>P2P Web Chat</title> <!-- Changed title slightly -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -120,5 +120,8 @@
         </div> <!-- End Main Content -->
     </div> <!-- End App Container -->
 
-    <script src="./renderer.js"></script></body>
+    <script src="https://bundle.run/simple-peer@9.11.1"></script>
+    <!-- Ensure renderer.js is loaded AFTER SimplePeer from CDN -->
+    <script src="./renderer.js"></script>
+</body>
 </html>
