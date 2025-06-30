@@ -95,7 +95,7 @@ body {
 
 /* Sidebar */
 .sidebar {
-    width: 240px;
+    width: 72px; /* Narrower sidebar for icon-focus */
     background-color: var(--secondary-bg);
     display: flex;
     flex-direction: column;
@@ -104,117 +104,165 @@ body {
 }
 
 .sidebar-header {
-    padding: 12px 15px;
-    height: 50px; /* Match chat header height */
+    padding: 10px; /* Adjusted padding for narrower sidebar */
+    height: 50px;
     display: flex;
     align-items: center;
+    justify-content: center; /* Center the button if it's the only item */
 }
 
 #initiate-new-chat-sidebar-button {
-    width: 100%;
+    width: auto; /* Allow button to size to content or be styled as icon */
+    padding: 8px 10px; /* Adjust if it becomes an icon button */
     font-size: var(--font-size-button);
+    /* If using an icon, text might be hidden or replaced by icon font/SVG */
 }
 
 .dm-list {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 8px 0 8px 8px; /* Padding on left for scrollbar indent */
+    overflow-x: hidden; /* Prevent horizontal scroll with tooltips */
+    padding: 8px 0;
 }
 
 .dm-item {
     display: flex;
     align-items: center;
-    padding: 6px 10px;
-    margin-right: 8px; /* For scrollbar */
+    justify-content: center; /* Center avatar when text is hidden */
+    padding: 8px 10px; /* Consistent padding */
+    margin: 0 auto 2px auto; /* Center items and add margin */
+    width: calc(100% - 16px); /* Use available width with some margin */
     border-radius: var(--border-radius-m);
     cursor: pointer;
     color: var(--text-muted);
-    margin-bottom: 2px;
+    position: relative; /* For tooltip positioning */
 }
 .dm-item:hover {
     background-color: var(--interactive-bg);
-    color: var(--text-normal);
 }
 .dm-item.active-dm {
-    background-color: var(--interactive-hover-bg); /* More prominent active state */
+    background-color: var(--interactive-hover-bg);
+    color: var(--text-bright);
+}
+.dm-item.active-dm .dm-item-name-tooltip { /* Ensure tooltip is visible on active item too */
     color: var(--text-bright);
 }
 
+
 .dm-item-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: var(--primary-accent); /* Placeholder */
-    margin-right: 12px;
+    width: 40px; /* Slightly larger avatars for icon view */
+    height: 40px;
+    border-radius: 25%; /* Squircle */
+    background-color: var(--primary-accent);
+    margin-right: 0; /* Hidden text, so no margin needed here */
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold; /* For initial if no image */
 }
 .dm-item-name {
-    flex-grow: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    font-size: var(--font-size-ui-normal); /* Using variable */
-    font-weight: 500;
+    display: none; /* Hide by default in narrow sidebar */
 }
 .dm-item-status {
-    width: 10px;
-    height: 10px;
+    width: 12px; /* Slightly larger status */
+    height: 12px;
     border-radius: 50%;
-    margin-left: 8px;
-    flex-shrink: 0;
-    border: 2px solid var(--secondary-bg); /* To make it pop from bg */
+    border: 2px solid var(--secondary-bg);
+    position: absolute; /* Position relative to dm-item or avatar */
+    bottom: 5px;
+    right: 5px; /* Adjust positioning based on avatar size */
+    /* display: none; Hide status if sidebar is very narrow and avatar is small */
 }
 .dm-item-status.online { background-color: var(--success-color); }
 .dm-item-status.offline { background-color: var(--text-muted); }
 
+/* Tooltip for DM item name on hover */
+.dm-item .dm-item-name-tooltip {
+    visibility: hidden;
+    width: max-content; /* Auto width based on content */
+    max-width: 150px; /* Max width for tooltip */
+    background-color: var(--tertiary-bg);
+    color: var(--text-normal);
+    text-align: center;
+    border-radius: var(--border-radius-m);
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 1001; /* Above other elements */
+    left: 105%; /* Position to the right of the sidebar item */
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s, visibility 0.2s;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.dm-item:hover .dm-item-name-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
 
 .user-panel {
-    padding: 10px 15px;
-    background-color: var(--tertiary-bg); /* Slightly darker */
-    display: flex;
-    align-items: center; /* Align items horizontally */
-    height: 52px; /* Consistent height */
-}
-.user-info { /* Renamed from user-avatar for clarity in flex context */
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: var(--primary-accent); /* Placeholder */
-    margin-right: 10px;
-    flex-shrink: 0;
-}
-.user-details {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden; /* For text ellipsis */
-}
-.user-name {
-    font-weight: 600;
-    font-size: var(--font-size-ui-normal); /* Using variable */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--text-bright);
-}
-.user-id-container {
+    padding: 10px; /* Adjusted padding */
+    background-color: var(--tertiary-bg);
     display: flex;
     align-items: center;
-    font-size: var(--font-size-ui-small); /* Using variable */
+    justify-content: center; /* Center content if text is hidden */
+    height: 60px; /* Slightly taller user panel */
+    position: relative; /* For tooltip/settings modal positioning */
+    cursor: pointer; /* Indicates it's clickable for settings */
+}
+.user-info { /* This is the avatar in the new structure */
+    width: 40px; /* Match DM avatar size */
+    height: 40px;
+    border-radius: 25%; /* Squircle */
+    background-color: var(--primary-accent);
+    margin-right: 0; /* Text is hidden or in tooltip */
+    flex-shrink: 0;
+    /* user-avatar class from previous step handles text centering & color */
+}
+.user-details { /* This contains name and ID, will be part of tooltip/modal */
+    display: none;
+}
+
+/* User panel tooltip (alternative to full modal for just showing name/ID) */
+.user-panel .user-panel-tooltip {
+    visibility: hidden;
+    width: max-content;
+    background-color: var(--tertiary-bg);
+    color: var(--text-normal);
+    border-radius: var(--border-radius-m);
+    padding: 8px 12px;
+    position: absolute;
+    z-index: 1001;
+    left: 105%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s, visibility 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.user-panel:hover .user-panel-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+.user-panel-tooltip .user-name { /* Styles for name inside tooltip */
+    font-weight: 600;
+    font-size: var(--font-size-ui-normal);
+    color: var(--text-bright);
+    display: block; /* Ensure it takes its own line */
+    margin-bottom: 3px;
+}
+.user-panel-tooltip .user-id-container { /* Styles for ID container inside tooltip */
+    font-size: var(--font-size-ui-small);
     color: var(--text-muted);
+    /* Flex display already handled by .user-id-container */
 }
-#local-user-id-sidebar { /* The span holding the ID itself */
-    font-size: var(--font-size-ui-small); /* Ensure consistency */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-right: 5px;
-    flex-shrink: 1; /* Allow shrinking but prioritize showing some ID */
+/* Hide the font size toggle button by default if it's in user-panel, will move to modal */
+#font-size-toggle-button.user-panel-button {
+    display: none;
 }
-.icon-button { /* General class for icon-like buttons */
+
+
+.icon-button {
     background: none;
     border: none;
     color: var(--text-muted);
@@ -234,19 +282,27 @@ body {
     font-style: italic;
 }
 
-/* Ensure avatars can center text */
+/* Ensure avatars can center text and apply squircle */
 .user-avatar, .dm-item-avatar, .chat-header-avatar {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 500; /* Slightly less bold than 'bold' */
+    font-weight: 500;
     color: rgba(255, 255, 255, 0.8);
     text-transform: uppercase;
-    overflow: hidden; /* In case letter is too wide */
-}
-.user-id-sidebar-label { /* For the "ID: " text */
     overflow: hidden;
-    text-overflow: ellipsis;
+    border-radius: 25%; /* Squircle shape */
+}
+/* Specific adjustment for chat-header-avatar if it's smaller */
+.chat-header-avatar {
+    width: 28px; /* If it's slightly smaller than sidebar avatars */
+    height: 28px;
+    font-size: 0.8em; /* Adjust letter size if avatar is smaller */
+}
+
+.user-id-sidebar-label { /* For the "ID: " text */
+    /* overflow: hidden; */ /* Not needed if user-details is hidden */
+    /* text-overflow: ellipsis; */
 }
 
 
@@ -570,6 +626,21 @@ button { /* Base button style */
     /* background-color: var(--interactive-hover-bg); */
 }
 
+.settings-select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: var(--border-radius-s);
+    border: 1px solid var(--tertiary-bg);
+    background-color: var(--input-bg);
+    color: var(--text-input);
+    font-size: var(--font-size-ui-normal);
+    margin-top: 4px; /* Space from label */
+}
+.settings-select:focus {
+    outline: none;
+    border-color: var(--primary-accent);
+}
+
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
@@ -597,4 +668,108 @@ button { /* Base button style */
 /* Utility classes */
 .hidden {
     display: none !important;
+}
+
+/* Settings Modal */
+.settings-box { /* Extends .card-overlay, but might need specifics */
+    max-width: 520px; /* Slightly wider for more content */
+    text-align: left; /* Override general card-overlay text-align if it was center */
+}
+.settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--tertiary-bg);
+}
+.settings-header h2 {
+    font-family: var(--font-display);
+    color: var(--text-bright);
+    font-size: var(--font-size-h2);
+    margin-bottom: 0; /* Remove default h2 margin */
+    text-align: left; /* Override card-overlay h2 text-align if it was center */
+}
+.modal-close-button { /* For the X button */
+    font-size: 1.2rem; /* Adjust size of X */
+    padding: 5px;
+}
+
+.settings-content {
+    max-height: 70vh; /* Allow content to scroll if too long */
+    overflow-y: auto;
+    padding-right: 10px; /* Space for scrollbar */
+}
+.settings-section {
+    margin-bottom: 25px;
+}
+.settings-section:last-child {
+    margin-bottom: 0;
+}
+.settings-section h3 {
+    font-family: var(--font-primary);
+    font-weight: 600;
+    font-size: 0.8rem; /* Smaller than modal h2 */
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--tertiary-bg);
+    padding-bottom: 8px;
+}
+.setting-item {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column; /* Stack label and control/value */
+}
+.setting-item label:not(.file-input-label) { /* Labels for static text or above inputs */
+    font-size: var(--font-size-ui-small);
+    color: var(--text-muted);
+    margin-bottom: 5px;
+    font-weight: 500;
+    text-transform: none; /* Override card-overlay label if it was uppercase */
+}
+.settings-value-display { /* For spans showing username/ID */
+    font-size: var(--font-size-ui-normal);
+    color: var(--text-normal);
+    padding: 8px 0; /* Add some padding if it's just text */
+    word-break: break-all; /* For long UserIDs */
+}
+.settings-id-container { /* user-id-container inside settings */
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-ui-normal); /* Match value display */
+}
+.settings-id-container #settings-userid-display {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+/* Buttons inside settings */
+.settings-section .button-secondary,
+.settings-section .button-primary {
+    width: 100%; /* Make buttons full width of their setting-item container */
+    margin-top: 5px; /* Space if label is above */
+}
+.full-width-button { /* Reusable class if needed elsewhere */
+    width: 100%;
+    display: block; /* Ensure it takes full width if it's an inline element like a label */
+    text-align: center;
+}
+
+/* Hidden file input styling */
+.hidden-file-input {
+    display: none;
+}
+.file-input-label { /* Style the label to look like a button */
+    cursor: pointer;
+    display: inline-block; /* Or block if it's .full-width-button */
+    padding: 10px 16px; /* Match button padding */
+    /* Inherits .button-secondary styles if class is applied */
+}
+
+/* Adjustments for user-panel-button if it's still used outside modal */
+.user-panel-button {
+    width: calc(100% - 20px); /* Adjust width if padding is 10px on user-panel */
+    margin: 8px auto 0 auto; /* Center it if user-panel is flex center */
+    display: block; /* To take width and margin auto */
+    font-size: 0.8rem;
 }

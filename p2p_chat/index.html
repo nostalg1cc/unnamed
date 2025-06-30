@@ -16,23 +16,24 @@
             </div>
             <div class="dm-list">
                 <div class="dm-item active-dm" id="current-chat-dm-item" style="display:none;">
-                    <span class="dm-item-avatar"></span>
-                    <span class="dm-item-name" id="dm-list-current-chat-name">Peer Name</span>
+                    <span class="dm-item-avatar" id="dm-list-current-chat-avatar">P</span> <!-- Avatar will have initial -->
+                    <span class="dm-item-name-tooltip" id="dm-list-current-chat-name-tooltip">Peer Name</span>
                     <span class="dm-item-status online"></span>
                 </div>
             </div>
-            <div class="user-panel">
-                <div class="user-info"> {/* Corrected: This div wraps avatar and details */}
-                    <span class="user-avatar" id="local-user-avatar-sidebar"></span>
-                    <div class="user-details">
-                        <span class="user-name" id="local-user-display-name-sidebar">Display Name</span>
-                        <div class="user-id-container">
-                            <span class="user-id-sidebar-label">ID: </span><span id="local-user-id-sidebar">Not Set</span>
-                            <button id="copy-user-id-button" class="icon-button" title="Copy User ID">📋</button>
-                        </div>
-                    </div>
+            <div class="user-panel" id="user-panel-clickable">
+                <div class="user-info"> <!-- This is effectively the avatar container now -->
+                    <span class="user-avatar" id="local-user-avatar-sidebar">U</span>
                 </div>
-                <button id="font-size-toggle-button" class="button-secondary user-panel-button">Font Size: Normal</button>
+                <div class="user-panel-tooltip" id="user-panel-details-tooltip">
+                    <span class="user-name" id="tooltip-username-local">Username</span>
+                    <div class="user-id-container">
+                        <span class="user-id-sidebar-label">ID: </span><span id="tooltip-userid-local">Not Set</span>
+                        <!-- Copy button will move to settings modal -->
+                    </div>
+                     <!-- Font size toggle will move to settings modal -->
+                </div>
+                <!-- Buttons are moved to settings modal -->
             </div>
         </div>
 
@@ -42,10 +43,15 @@
             <div id="initial-setup-view" class="overlay-view active-overlay">
                 <div class="setup-box card-overlay">
                     <h2>Welcome to P2P Chat!</h2>
-                    <p>Please set your display name to get started.</p>
-                    <label for="display-name-input">Display Name:</label>
-                    <input type="text" id="display-name-input" placeholder="Enter your cool name">
+                    <p>Please set your username to get started, or import an existing profile.</p>
+                    <label for="display-name-input">Username:</label>
+                    <input type="text" id="display-name-input" placeholder="Enter your username">
                     <button id="save-profile-button" class="button-primary">Save Profile & Get User ID</button>
+
+                    <hr class="p2p-hr" style="margin: 20px 0;">
+
+                    <label for="import-profile-file-input" class="button-secondary file-input-label full-width-button">Import Profile</label>
+                    <input type="file" id="import-profile-file-input" class="hidden-file-input" accept=".json">
                 </div>
             </div>
 
@@ -108,6 +114,7 @@
                         <span id="chat-partner-name-header">Chat with Peer</span>
                     </div>
                     <div class="chat-header-actions">
+                        <button id="start-voice-call-button" class="header-button" title="Start Voice Call" style="display:none;">📞</button> <!-- Initially hidden -->
                         <button id="export-chat-button" class="header-button" title="Export Chat History">💾</button>
                         <button id="disconnect-chat-button" class="header-button" title="Disconnect Chat">❌</button>
                     </div>
@@ -126,6 +133,78 @@
                  <h2>No Active Chat</h2>
                  <p>Click "New Chat / Connect" in the sidebar to start a new conversation or manage connections.</p>
             </div>
+
+            <!-- Settings Modal View (Overlay) -->
+            <div id="settings-modal-view" class="overlay-view"> <!-- Initially hidden -->
+                <div class="settings-box card-overlay">
+                    <div class="settings-header">
+                        <h2>User Settings</h2>
+                        <button id="close-settings-modal-button" class="icon-button modal-close-button" title="Close Settings">❌</button>
+                    </div>
+                    <div class="settings-content">
+                        <div class="settings-section">
+                            <h3>User Profile</h3>
+                            <div class="setting-item">
+                                <label>Username:</label>
+                                <span id="settings-username-display" class="settings-value-display"></span>
+                            </div>
+                            <div class="setting-item">
+                                <label>User ID:</label>
+                                <div class="user-id-container settings-id-container">
+                                    <span id="settings-userid-display" class="settings-value-display"></span>
+                                    <button id="settings-copy-userid-button" class="icon-button" title="Copy User ID">📋</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Appearance</h3>
+                            <div class="setting-item">
+                                <!-- <label>Font Size:</label> -->
+                                <button id="settings-font-size-toggle-button" class="button-secondary full-width-button">Font Size: Normal</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Chat Data</h3>
+                            <div class="setting-item">
+                                <button id="settings-export-chat-button" class="button-secondary full-width-button">Export Chat History</button>
+                                <!-- For selective export, a list/dropdown would go here -->
+                            </div>
+                            <div class="setting-item">
+                                <label for="settings-import-chat-file-input" class="button-secondary file-input-label full-width-button">Import Chat History</label>
+                                <input type="file" id="settings-import-chat-file-input" class="hidden-file-input" accept=".json">
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Account</h3>
+                            <div class="setting-item">
+                                <button id="settings-export-profile-button" class="button-secondary full-width-button">Export Profile</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-section">
+                            <h3>Voice & Audio</h3>
+                            <div class="setting-item">
+                                <label for="audio-input-select">Microphone (Input Device):</label>
+                                <select id="audio-input-select" class="settings-select">
+                                    <option value="">Default Microphone</option>
+                                    <!-- Devices will be populated by JS -->
+                                </select>
+                            </div>
+                            <div class="setting-item">
+                                <label for="audio-output-select">Speakers (Output Device):</label>
+                                <select id="audio-output-select" class="settings-select">
+                                    <option value="">Default Speakers</option>
+                                    <!-- Devices will be populated by JS - Note: Output selection is tricky -->
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div> <!-- End Main Content -->
     </div> <!-- End App Container -->
 

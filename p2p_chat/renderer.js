@@ -107,7 +107,7 @@ let chatPartnerID = null;
 let localUserProfile = null; // Loaded in DOMContentLoaded
 
 // --- DOM Elements ---
-let initialSetupView, displayNameInputSetup, saveProfileButtonSetup;
+let initialSetupView, displayNameInputSetup, saveProfileButtonSetup, importProfileFileInput, importProfileButtonLabel; // Added profile import elements
 
 // P2P Management Modal Elements
 let p2pManagementView, cancelP2PSetupButtonModal;
@@ -117,11 +117,22 @@ let signalingExchangeAreaModal, outgoingSignalDivModal, outgoingSignalTextareaMo
 let initiatorWaitsForAnswerDivModal, incomingAnswerSdpInputModal, submitIncomingAnswerButtonModal;
 
 
-let sidebar, initiateNewChatSidebarButton, currentChatDmItem, dmListCurrentChatName;
-let localUserDisplayNameSidebar, localUserIdSidebar, localUserAvatarSidebar, copyUserIdButton, fontSizeToggleButton; // Added fontSizeToggleButton
+let sidebar, initiateNewChatSidebarButton, currentChatDmItem, dmListCurrentChatAvatar, dmListCurrentChatNameTooltip; // Updated DM item refs
+let localUserAvatarSidebar, userPanelClickable, userPanelDetailsTooltip, tooltipUsernameLocal, tooltipUseridLocal; // Updated user panel refs
+// copyUserIdButton and fontSizeToggleButton are now part of settings modal
+// let copyUserIdButton, fontSizeToggleButton;
 
-let mainContent, chatViewArea, noChatView, appContainer; // Added appContainer
-let chatHeaderPartnerName, exportChatButtonHeader, disconnectChatButtonHeader;
+// Settings Modal Elements
+let settingsModalView, closeSettingsModalButton;
+let settingsUsernameDisplay, settingsUseridDisplay, settingsCopyUseridButton;
+let settingsFontSizeToggleButton;
+let settingsExportChatButton, settingsImportChatFileInput, settingsExportProfileButton;
+let audioInputSelect, audioOutputSelect; // For voice call settings
+
+// Note: settingsImportChatFileInput's label will trigger the click, no direct listener on input needed initially.
+
+let mainContent, chatViewArea, noChatView, appContainer;
+let chatHeaderPartnerName, exportChatButtonHeader, disconnectChatButtonHeader, startVoiceCallButton; // Added startVoiceCallButton
 let messagesArea, messageInputBox, sendMessageButtonBox;
 // Specific elements for ICE candidates if they are part of the modal.
 let localIceCandidatesOutputModal, remoteIceCandidateInputModal, addRemoteIceCandidateButtonModal;
@@ -132,6 +143,10 @@ function cacheDOMElements() {
     initialSetupView = document.getElementById('initial-setup-view');
     displayNameInputSetup = document.getElementById('display-name-input');
     saveProfileButtonSetup = document.getElementById('save-profile-button');
+    importProfileFileInput = document.getElementById('import-profile-file-input');
+    // The label for importProfileFileInput acts as the button, get it if needed for styling/interaction
+    importProfileButtonLabel = document.querySelector('label[for="import-profile-file-input"]');
+
 
     // P2P Management Modal Elements
     p2pManagementView = document.getElementById('p2p-management-view');
@@ -163,12 +178,27 @@ function cacheDOMElements() {
     sidebar = document.querySelector('.sidebar');
     initiateNewChatSidebarButton = document.getElementById('initiate-new-chat-sidebar-button');
     currentChatDmItem = document.getElementById('current-chat-dm-item');
-    dmListCurrentChatName = document.getElementById('dm-list-current-chat-name');
-    localUserDisplayNameSidebar = document.getElementById('local-user-display-name-sidebar');
-    localUserIdSidebar = document.getElementById('local-user-id-sidebar'); // This is the SPAN for the ID value
+    dmListCurrentChatAvatar = document.getElementById('dm-list-current-chat-avatar');
+    dmListCurrentChatNameTooltip = document.getElementById('dm-list-current-chat-name-tooltip');
+
+    userPanelClickable = document.getElementById('user-panel-clickable');
     localUserAvatarSidebar = document.getElementById('local-user-avatar-sidebar');
-    copyUserIdButton = document.getElementById('copy-user-id-button');
-    fontSizeToggleButton = document.getElementById('font-size-toggle-button');
+    userPanelDetailsTooltip = document.getElementById('user-panel-details-tooltip'); // This is the tooltip itself
+    tooltipUsernameLocal = document.getElementById('tooltip-username-local'); // Span inside tooltip
+    tooltipUseridLocal = document.getElementById('tooltip-userid-local');     // Span inside tooltip
+
+    // Settings Modal elements
+    settingsModalView = document.getElementById('settings-modal-view');
+    closeSettingsModalButton = document.getElementById('close-settings-modal-button');
+    settingsUsernameDisplay = document.getElementById('settings-username-display');
+    settingsUseridDisplay = document.getElementById('settings-userid-display');
+    settingsCopyUseridButton = document.getElementById('settings-copy-userid-button');
+    settingsFontSizeToggleButton = document.getElementById('settings-font-size-toggle-button');
+    settingsExportChatButton = document.getElementById('settings-export-chat-button');
+    settingsImportChatFileInput = document.getElementById('settings-import-chat-file-input');
+    settingsExportProfileButton = document.getElementById('settings-export-profile-button');
+    audioInputSelect = document.getElementById('audio-input-select');
+    audioOutputSelect = document.getElementById('audio-output-select');
 
 
     mainContent = document.querySelector('.main-content');
@@ -178,6 +208,7 @@ function cacheDOMElements() {
     chatHeaderPartnerName = document.getElementById('chat-partner-name-header');
     exportChatButtonHeader = document.getElementById('export-chat-button');
     disconnectChatButtonHeader = document.getElementById('disconnect-chat-button');
+    startVoiceCallButton = document.getElementById('start-voice-call-button'); // Cache new button
     messagesArea = document.getElementById('messages-area');
     messageInputBox = document.getElementById('message-input');
     sendMessageButtonBox = document.getElementById('send-message-button');
@@ -201,26 +232,36 @@ function getRandomBgColorForAvatar(seedText = "") {
 function displayLocalUserProfile() {
     const profileData = localUserProfile;
 
-    if (localUserDisplayNameSidebar) {
-        localUserDisplayNameSidebar.textContent = profileData && profileData.displayName ? profileData.displayName : 'Display Name';
-    }
-
+    // Update avatar
     if (localUserAvatarSidebar) {
         if (profileData && profileData.displayName) {
             localUserAvatarSidebar.textContent = profileData.displayName.substring(0,1).toUpperCase();
             const bgColor = getRandomBgColorForAvatar(profileData.displayName);
             localUserAvatarSidebar.style.backgroundColor = bgColor;
-            // Text color is set by CSS to be light, should contrast well with these darker random bg colors.
         } else {
             localUserAvatarSidebar.textContent = '?';
             localUserAvatarSidebar.style.backgroundColor = 'var(--interactive-bg)';
         }
     }
 
-    if (localUserIdSidebar) { // The span inside the div
-        localUserIdSidebar.textContent = profileData && profileData.userId ? profileData.userId : 'Not Set';
+    // Update tooltip content
+    if (tooltipUsernameLocal) {
+        tooltipUsernameLocal.textContent = profileData && profileData.displayName ? profileData.displayName : 'Username';
+    }
+    if (tooltipUseridLocal) {
+        tooltipUseridLocal.textContent = profileData && profileData.userId ? profileData.userId : 'Not Set';
     }
 
+    // Update settings modal display fields as well
+    if (settingsUsernameDisplay) {
+        settingsUsernameDisplay.textContent = profileData && profileData.displayName ? profileData.displayName : 'N/A';
+    }
+    if (settingsUseridDisplay) {
+        settingsUseridDisplay.textContent = profileData && profileData.userId ? profileData.userId : 'N/A';
+    }
+
+
+    // Show/hide initial setup view
     if (profileData && profileData.displayName && profileData.userId) {
         if (initialSetupView) initialSetupView.classList.remove('active-overlay');
         // Show noChatView only if chatView is also not active
@@ -462,6 +503,7 @@ function cleanupPeerConnection() {
     if (sendMessageButtonBox) sendMessageButtonBox.disabled = true;
     if (exportChatButtonHeader) exportChatButtonHeader.style.display = 'none';
     if (disconnectChatButtonHeader) disconnectChatButtonHeader.style.display = 'none';
+    if (startVoiceCallButton) startVoiceCallButton.style.display = 'none'; // Hide call button
 
     chatPartnerID = null;
 
@@ -519,7 +561,13 @@ function initializePeerEvents(currentPeer, initialMessageForOffer = null) {
         if (chatViewArea) chatViewArea.style.display = 'flex';
 
         if (chatHeaderPartnerName) chatHeaderPartnerName.textContent = chatPartnerID || 'Peer';
-        if (dmListCurrentChatName) dmListCurrentChatName.textContent = chatPartnerID || 'Peer Name';
+
+        // Update DM item in sidebar for current chat
+        if (dmListCurrentChatNameTooltip) dmListCurrentChatNameTooltip.textContent = chatPartnerID || 'Peer'; // Use peer's ID for tooltip for now
+        if (dmListCurrentChatAvatar) {
+            dmListCurrentChatAvatar.textContent = (chatPartnerID || "P").substring(0,1).toUpperCase();
+            dmListCurrentChatAvatar.style.backgroundColor = getRandomBgColorForAvatar(chatPartnerID || "DefaultPeer");
+        }
         if (currentChatDmItem) currentChatDmItem.style.display = 'flex';
 
         if (messagesArea) messagesArea.innerHTML = '';
@@ -533,6 +581,7 @@ function initializePeerEvents(currentPeer, initialMessageForOffer = null) {
         if (sendMessageButtonBox) sendMessageButtonBox.disabled = false;
         if (exportChatButtonHeader) exportChatButtonHeader.style.display = 'inline-block';
         if (disconnectChatButtonHeader) disconnectChatButtonHeader.style.display = 'inline-block';
+        if (startVoiceCallButton) startVoiceCallButton.style.display = 'inline-block'; // Show call button
     });
 
     currentPeer.on('data', receivedData => {
@@ -651,26 +700,65 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (exportChatButtonHeader) exportChatButtonHeader.addEventListener('click', handleExportChat);
 
-    if (copyUserIdButton) {
-        copyUserIdButton.addEventListener('click', () => {
+    // copyUserIdButton and fontSizeToggleButton listeners are now for settings modal elements
+
+    // Settings Modal Toggle
+    if (userPanelClickable) {
+        userPanelClickable.addEventListener('click', () => {
+            if (settingsModalView) settingsModalView.classList.toggle('active-overlay');
+            // Populate fields when opening, in case profile was updated elsewhere (though not currently possible)
+            if (settingsModalView && settingsModalView.classList.contains('active-overlay')) {
+                displayLocalUserProfile(); // Re-ensure modal fields are up-to-date
+            }
+        });
+    }
+    if (closeSettingsModalButton) {
+        closeSettingsModalButton.addEventListener('click', () => {
+            if (settingsModalView) settingsModalView.classList.remove('active-overlay');
+        });
+    }
+
+    // Copy User ID button (now in settings modal)
+    if (settingsCopyUseridButton) {
+        settingsCopyUseridButton.addEventListener('click', () => {
             if (localUserProfile && localUserProfile.userId) {
                 navigator.clipboard.writeText(localUserProfile.userId)
                     .then(() => {
-                        const originalText = copyUserIdButton.textContent;
-                        copyUserIdButton.textContent = '✓'; // Checkmark for copied
-                        copyUserIdButton.classList.add('copy-id-feedback');
+                        const originalText = settingsCopyUseridButton.textContent;
+                        settingsCopyUseridButton.textContent = '✓';
+                        settingsCopyUseridButton.classList.add('copy-id-feedback');
                         setTimeout(() => {
-                            copyUserIdButton.textContent = '📋'; // Restore icon
-                            copyUserIdButton.classList.remove('copy-id-feedback');
+                            settingsCopyUseridButton.textContent = '📋';
+                            settingsCopyUseridButton.classList.remove('copy-id-feedback');
                         }, 1500);
                     })
                     .catch(err => {
-                        console.error('Failed to copy User ID: ', err);
-                        alert('Failed to copy ID. Your browser might not support this feature or permission was denied.');
+                        console.error('Failed to copy User ID from settings: ', err);
+                        alert('Failed to copy ID.');
                     });
             }
         });
     }
+
+    // Font Size Toggle (now in settings modal)
+    if (settingsFontSizeToggleButton) {
+        // Initial button text update is handled by applyFontSize called after loading preference
+        settingsFontSizeToggleButton.addEventListener('click', () => {
+            let currentSizeClass = FONT_SIZE_CLASSES[0];
+            if(appContainer) {
+                for (const cls of FONT_SIZE_CLASSES) {
+                    if (appContainer.classList.contains(cls)) {
+                        currentSizeClass = cls;
+                        break;
+                    }
+                }
+            }
+            let currentIndex = FONT_SIZE_CLASSES.indexOf(currentSizeClass);
+            let nextIndex = (currentIndex + 1) % FONT_SIZE_CLASSES.length;
+            applyFontSize(FONT_SIZE_CLASSES[nextIndex]);
+        });
+    }
+
 
     // Initial UI state based on profile
     if (!localUserProfile || !localUserProfile.userId) {
@@ -687,29 +775,62 @@ window.addEventListener('DOMContentLoaded', () => {
     if (messageInputBox) messageInputBox.disabled = true; // Ensure disabled initially
     if (sendMessageButtonBox) sendMessageButtonBox.disabled = true;
 
-    // --- Font Size Toggle Setup ---
+    // --- Font Size Toggle Setup (Button is settingsFontSizeToggleButton now) ---
     const savedFontSize = localStorage.getItem(FONT_SIZE_STORAGE_KEY);
     if (savedFontSize && FONT_SIZE_CLASSES.includes(savedFontSize)) {
         applyFontSize(savedFontSize);
     } else {
         applyFontSize(FONT_SIZE_CLASSES[0]); // Default to normal
     }
+    // Event listener for settingsFontSizeToggleButton is already attached with other modal listeners.
 
-    if (fontSizeToggleButton) {
-        fontSizeToggleButton.addEventListener('click', () => {
-            let currentSizeClass = FONT_SIZE_CLASSES[0]; // Default
-            // Find current applied class from appContainer
-            if(appContainer) {
-                for (const cls of FONT_SIZE_CLASSES) {
-                    if (appContainer.classList.contains(cls)) {
-                        currentSizeClass = cls;
-                        break;
-                    }
-                }
+    // --- Profile Import/Export Listeners ---
+    if (settingsExportProfileButton) {
+        settingsExportProfileButton.addEventListener('click', handleExportProfile);
+    }
+    if (importProfileFileInput) {
+        importProfileFileInput.addEventListener('change', handleImportProfile);
+    }
+    // The importProfileButtonLabel (if cached) would typically not need a listener if its 'for' attr is correct.
+
+    // --- Chat Data Import/Export Stubs (listeners for placeholder functionality) ---
+    if (settingsExportChatButton) {
+        settingsExportChatButton.addEventListener('click', () => {
+            if (chatPartnerID) { // Check if a chat is active
+                handleExportChat(); // Call the existing export function
+            } else {
+                alert("Please select an active chat to export. (Future: allow selecting from history).");
+                // TODO: Future - Implement UI to list all chat histories (from localStorage keys)
+                // and let user select which one(s) to export.
             }
-            let currentIndex = FONT_SIZE_CLASSES.indexOf(currentSizeClass);
-            let nextIndex = (currentIndex + 1) % FONT_SIZE_CLASSES.length;
-            applyFontSize(FONT_SIZE_CLASSES[nextIndex]);
+        });
+    }
+    if (settingsImportChatFileInput) {
+        settingsImportChatFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                // Placeholder: Actual chat import logic is complex and would involve:
+                // 1. Reading the JSON file.
+                // 2. Parsing it (expecting an array of message objects, potentially with metadata).
+                // 3. Determining the peer ID from the imported data (e.g., from a metadata field or by finding the other participant).
+                // 4. Merging messages into existing localStorage history for that peer, handling duplicates or ordering.
+                // 5. Updating the UI if the imported chat is currently active.
+                alert(`Chat Import: Selected file '${file.name}'. (Full import logic not yet implemented).`);
+                event.target.value = ""; // Reset file input
+            }
+        });
+    }
+
+    // Placeholder for Start Voice Call button
+    if (startVoiceCallButton) {
+        startVoiceCallButton.addEventListener('click', () => {
+            if (!peerConnection || !peerConnection.connected) {
+                alert("You must be connected to a peer to start a call.");
+                return;
+            }
+            alert("Voice call feature coming soon! This button is a placeholder.");
+            // Future: Initiate call, manage call UI state (e.g., show 'Ringing...', 'Connected to Call')
+            // Actual WebRTC voice call implementation in next phase.
         });
     }
 });
@@ -759,6 +880,81 @@ function handleExportChat() {
 
     alert(`Chat history with ${chatPartnerID} prepared for download.`);
 }
+
+// --- Profile Portability Functions ---
+function handleExportProfile() {
+    if (!localUserProfile || !localUserProfile.userId || !localUserProfile.displayName) {
+        alert("Your profile is not fully set up. Cannot export.");
+        return;
+    }
+
+    const profileToExport = {
+        userId: localUserProfile.userId,
+        displayName: localUserProfile.displayName,
+        // Potentially add other settings here in future, like font preference
+        // fontSizePreference: localStorage.getItem(FONT_SIZE_STORAGE_KEY) || FONT_SIZE_CLASSES[0]
+    };
+
+    const jsonString = JSON.stringify(profileToExport, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const dateSuffix = new Date().toISOString().split('T')[0];
+    a.download = `p2p_chat_profile_${dateSuffix}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert("Profile exported successfully!");
+}
+
+function handleImportProfile(event) {
+    const file = event.target.files[0];
+    if (!file) {
+        return; // No file selected
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const importedProfile = JSON.parse(e.target.result);
+            if (importedProfile && importedProfile.userId && importedProfile.displayName) {
+                // Basic validation passed
+                localUserProfile = {
+                    userId: importedProfile.userId,
+                    displayName: importedProfile.displayName
+                    // timestamp can be new, or use an imported one if available
+                };
+                saveUserProfile(localUserProfile.displayName, localUserProfile.userId);
+                displayLocalUserProfile(); // Update all UI elements with new profile
+
+                // Apply font size preference if it was part of the export
+                // if (importedProfile.fontSizePreference && FONT_SIZE_CLASSES.includes(importedProfile.fontSizePreference)) {
+                //     applyFontSize(importedProfile.fontSizePreference);
+                // }
+
+                alert("Profile imported successfully!");
+                if (initialSetupView) initialSetupView.classList.remove('active-overlay');
+                if (noChatView && (!chatViewArea || chatViewArea.style.display === 'none')) {
+                    noChatView.style.display = 'flex';
+                } else if (noChatView) {
+                    noChatView.style.display = 'none';
+                }
+            } else {
+                alert("Invalid profile file format. Missing userId or displayName.");
+            }
+        } catch (error) {
+            console.error("Error parsing imported profile file:", error);
+            alert("Failed to import profile. The file might be corrupted or not a valid JSON profile.");
+        } finally {
+            // Reset file input so the same file can be re-selected if needed
+            if(importProfileFileInput) importProfileFileInput.value = "";
+        }
+    };
+    reader.readAsText(file);
+}
+
 
 // --- Accessibility Functions ---
 function applyFontSize(sizeClass) {
