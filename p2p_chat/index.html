@@ -2,9 +2,9 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <!-- CSP: Allow self, inline styles, data URIs, and script from bundle.run -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://bundle.run; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:;">
-    <title>P2P Web Chat</title> <!-- Changed title slightly -->
+    <!-- CSP: Allow self, inline styles, data URIs, and script from unpkg.com -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data:;">
+    <title>P2P Web Chat</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,31 +12,27 @@
         <!-- Sidebar: DM List & User Panel -->
         <div class="sidebar">
             <div class="sidebar-header">
-                <!-- Future: <input type="text" placeholder="Find or start a conversation" class="dm-search-input"> -->
                 <button id="initiate-new-chat-sidebar-button" class="button-primary">New Chat / Connect</button>
             </div>
             <div class="dm-list">
-                <!-- Dynamically populated when a chat is active -->
                 <div class="dm-item active-dm" id="current-chat-dm-item" style="display:none;">
-                    <span class="dm-item-avatar"></span> <!-- Placeholder for avatar -->
-                    <span class="dm-item-name" id="dm-list-current-chat-name">Peer Name</span>
-                    <span class="dm-item-status online"></span> <!-- Status indicator -->
-                </div>
-                <!-- Example of how other DMs might look (non-functional for now)
-                <div class="dm-item">
                     <span class="dm-item-avatar"></span>
-                    <span class="dm-item-name">Another Peer</span>
-                    <span class="dm-item-status offline"></span>
+                    <span class="dm-item-name" id="dm-list-current-chat-name">Peer Name</span>
+                    <span class="dm-item-status online"></span>
                 </div>
-                -->
             </div>
             <div class="user-panel">
-                <div class="user-info">
-                    <span class="user-avatar" id="local-user-avatar-sidebar"></span> <!-- Placeholder -->
-                    <span class="user-name" id="local-user-display-name-sidebar">Display Name</span>
+                <div class="user-info"> {/* Corrected: This div wraps avatar and details */}
+                    <span class="user-avatar" id="local-user-avatar-sidebar"></span>
+                    <div class="user-details">
+                        <span class="user-name" id="local-user-display-name-sidebar">Display Name</span>
+                        <div class="user-id-container">
+                            <span class="user-id-sidebar-label">ID: </span><span id="local-user-id-sidebar">Not Set</span>
+                            <button id="copy-user-id-button" class="icon-button" title="Copy User ID">📋</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="user-id-sidebar">ID: <span id="local-user-id-sidebar">Not Set</span></div>
-                <!-- Settings icon/button could go here -->
+                <button id="font-size-toggle-button" class="button-secondary user-panel-button">Font Size: Normal</button>
             </div>
         </div>
 
@@ -56,57 +52,70 @@
             <!-- P2P Connection Management View (Overlay) -->
             <div id="p2p-management-view" class="overlay-view">
                 <div class="p2p-box card-overlay">
-                    <h2 id="p2p-modal-title">Connect to a Peer</h2>
-                    <div id="initiate-chat-div">
-                        <h3>1. Initiate a New Chat</h3>
-                        <label for="peer-id-input">Enter Peer's User ID:</label>
-                        <input type="text" id="peer-id-input" placeholder="Peer's User ID">
-                        <button id="connect-peer-button" class="button-primary">Generate Offer</button>
+                    <h2 id="p2p-modal-title">Start or Respond to a Chat</h2>
+
+                    <!-- Combined section for initiating or responding based on what user does -->
+                    <div id="chat-initiation-section">
+                        <h3>Start a New Chat</h3>
+                        <label for="peer-id-input-modal">Peer's User ID:</label>
+                        <input type="text" id="peer-id-input-modal" placeholder="Enter Peer's User ID">
+                        <label for="initial-message-input-modal">Your first message (optional):</label>
+                        <textarea id="initial-message-input-modal" rows="2" placeholder="Say hello..."></textarea>
+                        <button id="send-initial-message-button-modal" class="button-primary">Send Message & Create Request</button>
                     </div>
+
                     <hr class="p2p-hr">
-                    <div id="receive-offer-div">
-                        <h3>2. Or, Process a Received Offer</h3>
-                        <label for="incoming-offer-peer-id">Peer's User ID (optional, for context):</label>
-                        <input type="text" id="incoming-offer-peer-id" placeholder="Enter peer's User ID">
-                        <label for="incoming-offer-sdp-input">Paste Offer SDP from Peer:</label>
-                        <textarea id="incoming-offer-sdp-input" rows="3" placeholder="Paste Offer SDP here..."></textarea>
-                        <button id="process-offer-button" class="button-primary">Generate Answer</button>
+
+                    <div id="paste-request-section">
+                        <h3>Process Received Chat Request</h3>
+                        <label for="incoming-chat-package-input-modal">Paste Chat Request Data from Peer:</label>
+                        <textarea id="incoming-chat-package-input-modal" rows="4" placeholder="Paste the entire request data your peer sent you..."></textarea>
+                        <button id="process-incoming-package-button-modal" class="button-primary">Process Request & Respond</button>
                     </div>
 
-                    <div id="signaling-exchange-area" style="display: none;">
+                    <!-- This area is shown after initiating or processing an offer/package -->
+                    <div id="signaling-exchange-area-modal" style="display: none;">
                         <h4>Signaling Data (Manual Copy/Paste)</h4>
-                        <label for="outgoing-signal-textarea">Your Outgoing Signal (Offer/Answer - Copy & Send to Peer):</label>
-                        <textarea id="outgoing-signal-textarea" rows="4" readonly placeholder="Your Offer or Answer SDP will appear here..."></textarea>
 
-                        <div id="initiator-waits-for-answer-div" style="display:none;">
-                            <label for="incoming-answer-sdp-input">Peer's Answer SDP (Paste here from Peer):</label>
-                            <textarea id="incoming-answer-sdp-input" rows="4" placeholder="Paste peer's Answer SDP here..."></textarea>
-                            <button id="submit-incoming-answer-button" class="button-primary">Submit Peer's Answer</button>
+                        <div id="outgoing-signal-div-modal"> <!-- For user to copy their Offer+Msg or just Answer -->
+                            <label for="outgoing-signal-textarea-modal">Your Outgoing Data (Copy this ENTIRE block and send to peer):</label>
+                            <textarea id="outgoing-signal-textarea-modal" rows="5" readonly placeholder="Your Offer or Answer data will appear here..."></textarea>
                         </div>
-                        <!-- ICE Candidate fields can be added here if trickle:true is used later -->
+
+                        <div id="initiator-waits-for-answer-div-modal" style="display:none;"> <!-- Only for original initiator -->
+                            <label for="incoming-answer-sdp-input-modal">Peer's Answer SDP (Paste Answer from Peer here):</label>
+                            <textarea id="incoming-answer-sdp-input-modal" rows="5" placeholder="Paste peer's Answer SDP here..."></textarea>
+                            <button id="submit-incoming-answer-button-modal" class="button-primary">Submit Peer's Answer</button>
+                        </div>
+                        <!-- For trickle:true - these elements would need to be added if used -->
+                        <!--
+                        <label for="local-ice-candidates-output">Your new ICE Candidates (send to peer as they appear):</label>
+                        <textarea id="local-ice-candidates-output" rows="3" readonly placeholder="Your new ICE candidates for the peer..."></textarea>
+                        <label for="remote-ice-candidate-input">Peer's ICE Candidate (paste from peer):</label>
+                        <input type="text" id="remote-ice-candidate-input" placeholder="Paste one ICE candidate string from peer">
+                        <button id="add-remote-ice-candidate-button" class="button-secondary">Add Peer's ICE Candidate</button>
+                        -->
                     </div>
                     <button id="cancel-p2p-setup-button" class="button-secondary" style="margin-top: 20px;">Close</button>
                 </div>
             </div>
 
             <!-- Chat View -->
-            <div class="chat-view" id="chat-view-area" style="display: none;"> <!-- Hidden until connection -->
+            <div class="chat-view" id="chat-view-area" style="display: none;">
                 <div class="chat-header">
                     <div class="chat-header-info">
-                        <span class="chat-header-avatar"></span> <!-- Placeholder -->
+                        <span class="chat-header-avatar"></span>
                         <span id="chat-partner-name-header">Chat with Peer</span>
                     </div>
                     <div class="chat-header-actions">
                         <button id="export-chat-button" class="header-button" title="Export Chat History">💾</button>
                         <button id="disconnect-chat-button" class="header-button" title="Disconnect Chat">❌</button>
-                        <!-- disconnect-peer-button was the old ID, changed to disconnect-chat-button for clarity -->
                     </div>
                 </div>
                 <div class="messages-list" id="messages-area">
                     <!-- Messages will appear here -->
                 </div>
                 <div class="message-input-box">
-                    <!-- <button class="attach-button">+</button> Future feature -->
                     <input type="text" id="message-input" placeholder="Type a message...">
                     <button id="send-message-button" class="send-button" title="Send Message">➢</button>
                 </div>
@@ -120,7 +129,7 @@
         </div> <!-- End Main Content -->
     </div> <!-- End App Container -->
 
-    <script src="https://bundle.run/simple-peer@9.11.1"></script>
+    <script src="https://unpkg.com/simple-peer@9.11.1/simplepeer.min.js"></script>
     <!-- Ensure renderer.js is loaded AFTER SimplePeer from CDN -->
     <script src="./renderer.js"></script>
 </body>

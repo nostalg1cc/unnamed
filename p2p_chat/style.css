@@ -1,5 +1,16 @@
 /* style.css */
 :root {
+    /* Font Sizes */
+    --font-size-base: 15px;
+    --font-size-chat-text: 0.95rem;
+    --font-size-ui-small: 0.75rem;
+    --font-size-ui-normal: 0.9rem;
+    --font-size-header: 1rem; /* For chat partner name */
+    --font-size-button: 0.9rem;
+    --font-size-h2: 1.5rem;
+    --font-size-h3: 1.1rem; /* For modal subheadings */
+
+    /* Existing color and layout variables */
     --primary-bg: #36393f;
     --secondary-bg: #2f3136;
     --tertiary-bg: #202225; /* Often used for borders or very dark elements */
@@ -48,8 +59,33 @@ body {
     overflow: hidden;
     height: 100vh;
     width: 100vw;
-    font-size: 15px; /* Base font size */
+    font-size: var(--font-size-base); /* Use variable for base size */
 }
+
+/* Font size modifier classes to be applied to .app-container */
+.font-scale-normal { /* Default, variables in :root are normal */ }
+
+.font-scale-large {
+    --font-size-base: 17px;
+    --font-size-chat-text: 1.05rem;
+    --font-size-ui-small: 0.85rem;
+    --font-size-ui-normal: 1rem;
+    --font-size-header: 1.1rem;
+    --font-size-button: 1rem;
+    --font-size-h2: 1.65rem;
+    --font-size-h3: 1.2rem;
+}
+.font-scale-larger {
+    --font-size-base: 19px;
+    --font-size-chat-text: 1.15rem;
+    --font-size-ui-small: 0.95rem;
+    --font-size-ui-normal: 1.1rem;
+    --font-size-header: 1.2rem;
+    --font-size-button: 1.1rem;
+    --font-size-h2: 1.8rem;
+    --font-size-h3: 1.3rem;
+}
+
 
 /* App Container - Main Layout */
 .app-container {
@@ -76,6 +112,7 @@ body {
 
 #initiate-new-chat-sidebar-button {
     width: 100%;
+    font-size: var(--font-size-button);
 }
 
 .dm-list {
@@ -120,7 +157,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 0.95rem;
+    font-size: var(--font-size-ui-normal); /* Using variable */
     font-weight: 500;
 }
 .dm-item-status {
@@ -157,16 +194,57 @@ body {
 }
 .user-name {
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: var(--font-size-ui-normal); /* Using variable */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     color: var(--text-bright);
 }
-.user-id-sidebar {
-    font-size: 0.75rem;
+.user-id-container {
+    display: flex;
+    align-items: center;
+    font-size: var(--font-size-ui-small); /* Using variable */
     color: var(--text-muted);
+}
+#local-user-id-sidebar { /* The span holding the ID itself */
+    font-size: var(--font-size-ui-small); /* Ensure consistency */
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 5px;
+    flex-shrink: 1; /* Allow shrinking but prioritize showing some ID */
+}
+.icon-button { /* General class for icon-like buttons */
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px;
+    font-size: var(--font-size-ui-normal); /* Using variable, was 0.95rem */
+    line-height: 1;
+    display: inline-flex; /* Align icon nicely */
+    align-items: center;
+    justify-content: center;
+}
+.icon-button:hover {
+    color: var(--text-normal);
+}
+.copy-id-feedback {
+    color: var(--success-color) !important; /* Important to override default */
+    font-style: italic;
+}
+
+/* Ensure avatars can center text */
+.user-avatar, .dm-item-avatar, .chat-header-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500; /* Slightly less bold than 'bold' */
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    overflow: hidden; /* In case letter is too wide */
+}
+.user-id-sidebar-label { /* For the "ID: " text */
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -212,21 +290,30 @@ body {
     font-family: var(--font-display);
     margin-bottom: 8px;
     color: var(--text-bright);
-    font-size: 1.5rem;
+    font-size: var(--font-size-h2); /* Using variable */
     text-align: center;
+}
+.card-overlay h3 { /* For subheadings like "1. Initiate a New Chat" */
+    font-size: var(--font-size-h3);
+    color: var(--text-normal);
+    margin-top: 15px;
+    margin-bottom: 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--tertiary-bg);
+    padding-bottom: 5px;
 }
 .card-overlay p {
     margin-bottom: 20px;
     color: var(--text-muted);
-    font-size: 0.9rem;
+    font-size: var(--font-size-ui-normal); /* Using variable */
     text-align: center;
 }
 .card-overlay label {
     display: block;
     margin-bottom: 6px;
-    font-size: 0.75rem; /* Smaller label */
+    font-size: var(--font-size-ui-small); /* Using variable */
     font-weight: 600;
-    color: var(--text-muted); /* Brighter label */
+    color: var(--text-muted);
     text-transform: uppercase;
     line-height: 1.2;
 }
@@ -239,7 +326,7 @@ body {
     background-color: var(--input-bg);
     color: var(--text-input);
     margin-bottom: 16px;
-    font-size: 0.95rem;
+    font-size: var(--font-size-ui-normal); /* Using variable */
 }
 .card-overlay textarea {
     min-height: 70px;
@@ -283,14 +370,14 @@ body {
 }
 #chat-partner-name-header {
     font-weight: 600;
-    font-size: 1rem;
+    font-size: var(--font-size-header); /* Using variable */
     color: var(--text-bright);
 }
 .chat-header-actions .header-button {
     background: none;
     border: none;
     color: var(--text-muted);
-    font-size: 1.25rem; /* Larger for icon-like buttons */
+    font-size: var(--font-size-header); /* Using variable, adjusted for icon size */
     padding: 6px;
     margin-left: 8px;
     cursor: pointer;
@@ -345,10 +432,18 @@ body {
     align-self: flex-end; /* Pushes the whole wrapper to the right */
 }
 .message-wrapper.self .message-content-wrapper {
-    background-color: var(--primary-accent);
-    color: var(--text-bright);
-    border-bottom-right-radius: var(--border-radius-s); /* Slightly different corner */
+    /* background-color: var(--primary-accent); */ /* Original self bubble color */
+    background-color: transparent; /* Remove distinct background for self messages */
+    color: var(--text-normal); /* Standard text color, ensure it's readable on --content-bg */
+    /* border-bottom-right-radius: var(--border-radius-s); */ /* Keep if you want shape, remove if fully plain */
+    /* padding: 8px 12px; */ /* Keep padding for text spacing */
+    /* No border needed if it's plain text */
 }
+/* We might need to ensure the text itself has enough padding if the wrapper's padding was for the bubble */
+.message-wrapper.self .message-text {
+    /* Any specific styling for self message text if needed */
+}
+
 
 .message-wrapper.peer {
     align-self: flex-start; /* Pushes the whole wrapper to the left */
@@ -361,21 +456,21 @@ body {
 
 .message-sender { /* Displayed above the message text */
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: var(--font-size-ui-normal); /* Using variable */
     margin-bottom: 3px;
-    color: var(--text-bright); /* Default, can be colored by user role/ID */
+    color: var(--text-bright);
 }
 .message-wrapper.peer .message-sender {
     /* color: #some-peer-specific-color; Can be set via JS if needed */
 }
 
 .message-timestamp { /* Displayed next to sender or on hover */
-    font-size: 0.7rem;
+    font-size: var(--font-size-ui-small); /* Using variable */
     color: var(--text-muted);
     margin-left: 8px;
 }
 .message-text {
-    font-size: 0.95rem;
+    font-size: var(--font-size-chat-text); /* Using variable */
 }
 
 .message-input-box {
@@ -393,7 +488,7 @@ body {
     border: none;
     background-color: var(--interactive-bg); /* Slightly lighter than main bg */
     color: var(--text-input);
-    font-size: 0.95rem;
+    font-size: var(--font-size-chat-text); /* Using variable */
     margin-right:10px;
     outline: none;
 }
@@ -404,7 +499,7 @@ body {
     background: none; /* Icon button */
     border: none;
     color: var(--text-muted);
-    font-size: 1.5rem; /* For a text icon like ➢ or an actual SVG/Font icon */
+    font-size: var(--font-size-header); /* Using variable, was 1.5rem for icon */
     padding: 5px;
     cursor: pointer;
     transition: color 0.2s;
@@ -440,12 +535,13 @@ button { /* Base button style */
     transition: background-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
     border-radius: var(--border-radius-s);
     border: none;
+    font-size: var(--font-size-button); /* Apply base button font size */
 }
 .button-primary {
     background-color: var(--primary-accent);
     color: var(--text-bright);
     padding: 10px 16px;
-    font-size: 0.9rem;
+    /* font-size already set by base button rule */
 }
 .button-primary:hover {
     background-color: var(--primary-accent-hover);
@@ -454,11 +550,26 @@ button { /* Base button style */
     background-color: var(--interactive-bg);
     color: var(--text-normal);
     padding: 10px 16px;
-    font-size: 0.9rem;
+    /* font-size already set by base button rule */
 }
 .button-secondary:hover {
     background-color: var(--interactive-hover-bg);
 }
+
+.user-panel-button { /* Style for the new font size button */
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px 10px;
+    font-size: 0.85rem; /* Slightly smaller than main buttons, or use var(--font-size-ui-small) */
+    /* It will inherit .button-secondary styles if class is applied, or define its own */
+    /* If it doesn't have .button-secondary, define full style: */
+    /* background-color: var(--interactive-bg); */
+    /* color: var(--text-normal); */
+}
+.user-panel-button:hover {
+    /* background-color: var(--interactive-hover-bg); */
+}
+
 
 /* Scrollbar Styling */
 ::-webkit-scrollbar {

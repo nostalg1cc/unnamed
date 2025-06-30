@@ -22,6 +22,9 @@ if (typeof SimplePeer === 'undefined') {
 
 const USER_PROFILE_KEY = 'p2pChatUserProfile';
 const CHAT_HISTORY_PREFIX = 'p2pChatHistory_';
+const FONT_SIZE_CLASSES = ['font-scale-normal', 'font-scale-large', 'font-scale-larger'];
+const FONT_SIZE_LABELS = ['Normal', 'Large', 'Larger'];
+const FONT_SIZE_STORAGE_KEY = 'p2pChatFontSizePreference';
 
 // --- Chat History Storage ---
 function saveMessageToHistory(peerId, messageObject) {
@@ -105,15 +108,19 @@ let localUserProfile = null; // Loaded in DOMContentLoaded
 
 // --- DOM Elements ---
 let initialSetupView, displayNameInputSetup, saveProfileButtonSetup;
-let p2pManagementView, initiateChatDivModal, peerIdInputModal, connectPeerButtonModal;
-let receiveOfferDivModal, incomingOfferPeerIdModal, incomingOfferSdpInputModal, processOfferButtonModal;
-let signalingExchangeAreaModal, outgoingSignalTextareaModal, initiatorWaitsForAnswerDivModal, incomingAnswerSdpInputModal, submitIncomingAnswerButtonModal;
-let cancelP2PSetupButtonModal;
+
+// P2P Management Modal Elements
+let p2pManagementView, cancelP2PSetupButtonModal;
+let chatInitiationSectionModal, peerIdInputModal, initialMessageInputModal, sendInitialMessageButtonModal;
+let pasteRequestSectionModal, incomingChatPackageInputModal, processIncomingPackageButtonModal;
+let signalingExchangeAreaModal, outgoingSignalDivModal, outgoingSignalTextareaModal;
+let initiatorWaitsForAnswerDivModal, incomingAnswerSdpInputModal, submitIncomingAnswerButtonModal;
+
 
 let sidebar, initiateNewChatSidebarButton, currentChatDmItem, dmListCurrentChatName;
-let localUserDisplayNameSidebar, localUserIdSidebar, localUserAvatarSidebar;
+let localUserDisplayNameSidebar, localUserIdSidebar, localUserAvatarSidebar, copyUserIdButton, fontSizeToggleButton; // Added fontSizeToggleButton
 
-let mainContent, chatViewArea, noChatView;
+let mainContent, chatViewArea, noChatView, appContainer; // Added appContainer
 let chatHeaderPartnerName, exportChatButtonHeader, disconnectChatButtonHeader;
 let messagesArea, messageInputBox, sendMessageButtonBox;
 // Specific elements for ICE candidates if they are part of the modal.
@@ -121,26 +128,32 @@ let localIceCandidatesOutputModal, remoteIceCandidateInputModal, addRemoteIceCan
 
 
 function cacheDOMElements() {
+    appContainer = document.querySelector('.app-container'); // Cache app container
     initialSetupView = document.getElementById('initial-setup-view');
     displayNameInputSetup = document.getElementById('display-name-input');
     saveProfileButtonSetup = document.getElementById('save-profile-button');
 
+    // P2P Management Modal Elements
     p2pManagementView = document.getElementById('p2p-management-view');
-    initiateChatDivModal = document.getElementById('initiate-chat-div');
-    peerIdInputModal = document.getElementById('peer-id-input');
-    connectPeerButtonModal = document.getElementById('connect-peer-button');
-    receiveOfferDivModal = document.getElementById('receive-offer-div');
-    incomingOfferPeerIdModal = document.getElementById('incoming-offer-peer-id');
-    incomingOfferSdpInputModal = document.getElementById('incoming-offer-sdp-input');
-    processOfferButtonModal = document.getElementById('process-offer-button');
-    signalingExchangeAreaModal = document.getElementById('signaling-exchange-area');
-    outgoingSignalTextareaModal = document.getElementById('outgoing-signal-textarea');
-    initiatorWaitsForAnswerDivModal = document.getElementById('initiator-waits-for-answer-div');
-    incomingAnswerSdpInputModal = document.getElementById('incoming-answer-sdp-input');
-    submitIncomingAnswerButtonModal = document.getElementById('submit-incoming-answer-button');
     cancelP2PSetupButtonModal = document.getElementById('cancel-p2p-setup-button');
 
-    // ICE Candidate related elements - assuming they are part of the p2p-management-view modal
+    chatInitiationSectionModal = document.getElementById('chat-initiation-section');
+    peerIdInputModal = document.getElementById('peer-id-input-modal');
+    initialMessageInputModal = document.getElementById('initial-message-input-modal');
+    sendInitialMessageButtonModal = document.getElementById('send-initial-message-button-modal');
+
+    pasteRequestSectionModal = document.getElementById('paste-request-section');
+    incomingChatPackageInputModal = document.getElementById('incoming-chat-package-input-modal');
+    processIncomingPackageButtonModal = document.getElementById('process-incoming-package-button-modal');
+
+    signalingExchangeAreaModal = document.getElementById('signaling-exchange-area-modal');
+    outgoingSignalDivModal = document.getElementById('outgoing-signal-div-modal');
+    outgoingSignalTextareaModal = document.getElementById('outgoing-signal-textarea-modal');
+    initiatorWaitsForAnswerDivModal = document.getElementById('initiator-waits-for-answer-div-modal');
+    incomingAnswerSdpInputModal = document.getElementById('incoming-answer-sdp-input-modal');
+    submitIncomingAnswerButtonModal = document.getElementById('submit-incoming-answer-button-modal');
+
+    // ICE Candidate related elements - these IDs are from the old HTML, ensure they are updated if used
     // If these IDs exist in the new HTML structure for the modal:
     localIceCandidatesOutputModal = document.getElementById('local-ice-candidates-output'); // Ensure this ID exists in modal HTML
     remoteIceCandidateInputModal = document.getElementById('remote-ice-candidate-input');   // Ensure this ID exists
@@ -152,8 +165,10 @@ function cacheDOMElements() {
     currentChatDmItem = document.getElementById('current-chat-dm-item');
     dmListCurrentChatName = document.getElementById('dm-list-current-chat-name');
     localUserDisplayNameSidebar = document.getElementById('local-user-display-name-sidebar');
-    localUserIdSidebar = document.getElementById('local-user-id-sidebar');
+    localUserIdSidebar = document.getElementById('local-user-id-sidebar'); // This is the SPAN for the ID value
     localUserAvatarSidebar = document.getElementById('local-user-avatar-sidebar');
+    copyUserIdButton = document.getElementById('copy-user-id-button');
+    fontSizeToggleButton = document.getElementById('font-size-toggle-button');
 
 
     mainContent = document.querySelector('.main-content');
@@ -169,16 +184,42 @@ function cacheDOMElements() {
 }
 
 // --- UI Update Functions ---
+
+// Helper function to generate a random vibrant color based on a seed string
+function getRandomBgColorForAvatar(seedText = "") {
+    let hash = 0;
+    for (let i = 0; i < seedText.length; i++) {
+        hash = seedText.charCodeAt(i) + ((hash << 5) - hash);
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    const h = Math.abs(hash % 360); // Hue (0-359)
+    const s = 60 + Math.abs(hash % 20); // Saturation (60-80%)
+    const l = 40 + Math.abs(hash % 10); // Lightness (40-50%)
+    return `hsl(${h}, ${s}%, ${l}%)`;
+}
+
 function displayLocalUserProfile() {
     const profileData = localUserProfile;
 
-    if (localUserDisplayNameSidebar) localUserDisplayNameSidebar.textContent = profileData && profileData.displayName ? profileData.displayName : 'Display Name';
-    if (localUserAvatarSidebar && profileData && profileData.displayName) { // Simple text avatar
-        localUserAvatarSidebar.textContent = profileData.displayName.substring(0,1).toUpperCase();
-    } else if (localUserAvatarSidebar) {
-        localUserAvatarSidebar.textContent = '?';
+    if (localUserDisplayNameSidebar) {
+        localUserDisplayNameSidebar.textContent = profileData && profileData.displayName ? profileData.displayName : 'Display Name';
     }
-    if (localUserIdSidebar) localUserIdSidebar.textContent = profileData && profileData.userId ? profileData.userId : 'Not Set';
+
+    if (localUserAvatarSidebar) {
+        if (profileData && profileData.displayName) {
+            localUserAvatarSidebar.textContent = profileData.displayName.substring(0,1).toUpperCase();
+            const bgColor = getRandomBgColorForAvatar(profileData.displayName);
+            localUserAvatarSidebar.style.backgroundColor = bgColor;
+            // Text color is set by CSS to be light, should contrast well with these darker random bg colors.
+        } else {
+            localUserAvatarSidebar.textContent = '?';
+            localUserAvatarSidebar.style.backgroundColor = 'var(--interactive-bg)';
+        }
+    }
+
+    if (localUserIdSidebar) { // The span inside the div
+        localUserIdSidebar.textContent = profileData && profileData.userId ? profileData.userId : 'Not Set';
+    }
 
     if (profileData && profileData.displayName && profileData.userId) {
         if (initialSetupView) initialSetupView.classList.remove('active-overlay');
@@ -249,67 +290,114 @@ function appendMessage(messageObject, isHistory = false) {
 }
 
 
-// --- P2P Functions (To be refactored in next chunk) ---
-function initiateChatRequest() {
+// --- P2P Functions ---
+function sendInitialChatRequest() { // Formerly initiateChatRequest
     if (!SimplePeer) { alert("SimplePeer is not available."); return; }
-    if (peerConnection) { alert("Already in a session or attempting. Disconnect first."); return; }
-
-    const targetPeerIdText = peerIdInputModal.value.trim(); // Use modal ID
-    if (!targetPeerIdText) { alert("Please enter the Peer's User ID."); return; }
-    chatPartnerID = targetPeerIdText;
-
-    peerConnection = new SimplePeer({ initiator: true, trickle: false });
-    initializePeerEvents(peerConnection);
-
-    if (initiateChatDivModal) initiateChatDivModal.style.display = 'none';
-    if (receiveOfferDivModal) receiveOfferDivModal.style.display = 'none';
-    if (signalingExchangeAreaModal) signalingExchangeAreaModal.style.display = 'block';
-    if (initiatorWaitsForAnswerDivModal) initiatorWaitsForAnswerDivModal.style.display = 'block';
-
-    if (outgoingSignalTextareaModal) outgoingSignalTextareaModal.value = '';
-    if (incomingAnswerSdpInputModal) incomingAnswerSdpInputModal.value = '';
-    if (localIceCandidatesOutputModal) localIceCandidatesOutputModal.value = '';
-    console.log("Initiating chat. Waiting for offer SDP...");
-}
-
-function processIncomingOffer() {
-    if (!SimplePeer) { alert("SimplePeer is not available."); return; }
-    if (peerConnection) { alert("Already in a session or attempting. Disconnect first."); return; }
-
-    const offerSdpString = incomingOfferSdpInputModal.value.trim();
-    if (!offerSdpString) {
-        alert("Please paste the Offer SDP from your peer.");
+    if (peerConnection) {
+        alert("Already in a session or attempting to connect. Please close the current P2P setup or disconnect first.");
+        if (p2pManagementView) p2pManagementView.classList.remove('active-overlay');
+        return;
+    }
+    if (!localUserProfile || !localUserProfile.userId) {
+        alert("Your profile is not set up. Please save your profile first.");
+        if (initialSetupView) initialSetupView.classList.add('active-overlay');
         return;
     }
 
-    const peerIdFromInput = incomingOfferPeerIdModal.value.trim();
-    chatPartnerID = peerIdFromInput || 'Incoming Peer (ID unknown)';
+    const targetPeerIdText = peerIdInputModal.value.trim();
+    if (!targetPeerIdText) { alert("Please enter the Peer's User ID."); return; }
+
+    chatPartnerID = targetPeerIdText; // Tentatively set
+    const initialMessageText = initialMessageInputModal.value.trim();
+
+    peerConnection = new SimplePeer({ initiator: true, trickle: false });
+    initializePeerEvents(peerConnection, initialMessageText); // Pass initial message to handler
+
+    // UI updates for modal: Hide initial input sections, show signaling area
+    if (chatInitiationSectionModal) chatInitiationSectionModal.style.display = 'none';
+    if (pasteRequestSectionModal) pasteRequestSectionModal.style.display = 'none';
+    if (signalingExchangeAreaModal) signalingExchangeAreaModal.style.display = 'block';
+    if (outgoingSignalDivModal) outgoingSignalDivModal.style.display = 'block'; // Ensure this is visible
+    if (initiatorWaitsForAnswerDivModal) initiatorWaitsForAnswerDivModal.style.display = 'block';
+
+    if (outgoingSignalTextareaModal) outgoingSignalTextareaModal.value = ''; // Will be populated by 'signal' event
+    if (incomingAnswerSdpInputModal) incomingAnswerSdpInputModal.value = '';
+    if (localIceCandidatesOutputModal) localIceCandidatesOutputModal.value = ''; // If using trickle:true later
+    console.log("Attempting to create chat request. Waiting for offer SDP...");
+}
+
+function handleIncomingChatPackage() { // Formerly processIncomingOffer
+    if (!SimplePeer) { alert("SimplePeer is not available."); return; }
+    if (peerConnection) {
+        alert("Already in a session or attempting to connect. Please close the current P2P setup or disconnect first.");
+        if (p2pManagementView) p2pManagementView.classList.remove('active-overlay');
+        return;
+    }
+     if (!localUserProfile || !localUserProfile.userId) {
+        alert("Your profile is not set up. Please save your profile first.");
+        if (initialSetupView) initialSetupView.classList.add('active-overlay');
+        return;
+    }
+
+    const chatPackageString = incomingChatPackageInputModal.value.trim();
+    if (!chatPackageString) {
+        alert("Please paste the Chat Request Data from your peer.");
+        return;
+    }
 
     try {
-        const offer = JSON.parse(offerSdpString);
+        const receivedPackage = JSON.parse(chatPackageString);
+        if (!receivedPackage.offerSdp || !receivedPackage.senderId || !receivedPackage.senderDisplayName) {
+            alert("Invalid Chat Request Data format. Missing required fields.");
+            return;
+        }
+
+        chatPartnerID = receivedPackage.senderId; // Set chatPartnerID from the package
+        const peerDisplayName = receivedPackage.senderDisplayName;
+        const initialMessageFromPeer = receivedPackage.initialMessage;
+
         peerConnection = new SimplePeer({ initiator: false, trickle: false });
-        initializePeerEvents(peerConnection);
-        peerConnection.signal(offer);
+        initializePeerEvents(peerConnection); // No initial message to send from this side
+        peerConnection.signal(receivedPackage.offerSdp); // Process the extracted offer
 
-        if (initiateChatDivModal) initiateChatDivModal.style.display = 'none';
-        if (receiveOfferDivModal) receiveOfferDivModal.style.display = 'none';
+        // UI updates for modal
+        if (chatInitiationSectionModal) chatInitiationSectionModal.style.display = 'none';
+        if (pasteRequestSectionModal) pasteRequestSectionModal.style.display = 'none';
         if (signalingExchangeAreaModal) signalingExchangeAreaModal.style.display = 'block';
-        if (initiatorWaitsForAnswerDivModal) initiatorWaitsForAnswerDivModal.style.display = 'none';
+        if (outgoingSignalDivModal) outgoingSignalDivModal.style.display = 'block'; // For our answer
+        if (initiatorWaitsForAnswerDivModal) initiatorWaitsForAnswerDivModal.style.display = 'none'; // We are not waiting for an answer here
 
-        if (outgoingSignalTextareaModal) outgoingSignalTextareaModal.value = '';
+        if (outgoingSignalTextareaModal) outgoingSignalTextareaModal.value = ''; // Will be populated by 'signal' event with our answer
         if (localIceCandidatesOutputModal) localIceCandidatesOutputModal.value = '';
-        console.log("Received offer, processing. Waiting for answer SDP...");
+
+        console.log(`Processing chat request from ${peerDisplayName} (ID: ${chatPartnerID}). Waiting for answer SDP to be generated...`);
+
+        // If there was an initial message from the peer, display and save it
+        if (initialMessageFromPeer) {
+            const messageObject = {
+                text: initialMessageFromPeer,
+                timestamp: new Date().toISOString(), // Or use a timestamp from package if provided
+                sender: chatPartnerID,
+                senderName: peerDisplayName
+            };
+            // Displaying it now might be premature if connection isn't up.
+            // Let's store it and display it upon 'connect' event.
+            // Or, we can display it optimistically. For now, let's wait for 'connect'.
+            // This initial message will be the first one loaded from history effectively if saved now.
+            saveMessageToHistory(chatPartnerID, messageObject);
+            // To display immediately (optional, might look odd if connection fails):
+            // appendMessage(messageObject);
+        }
+
     } catch (err) {
-        alert("Invalid Offer SDP format. It should be a JSON string.");
-        console.error("Error parsing offer SDP:", err);
-        if (p2pManagementView) p2pManagementView.classList.remove('active-overlay'); // Close modal on error
-        cleanupPeerConnection(); // Or just reset modal state
+        alert("Invalid Chat Request Data. Ensure it's a valid JSON package.");
+        console.error("Error parsing chat request package:", err);
     }
 }
 
-function submitPeerAnswer() {
+function submitPeerAnswer() { // For initiator to submit the answer SDP received from peer
     if (!peerConnection || !peerConnection.initiator) {
-        alert("Not in initiator connection attempt."); return;
+        alert("Not in initiator connection attempt, or SimplePeer instance missing."); return;
     }
 
     const answerSdpString = incomingAnswerSdpInputModal.value.trim();
@@ -318,12 +406,17 @@ function submitPeerAnswer() {
     }
 
     try {
-        const answer = JSON.parse(answerSdpString);
+        const answer = JSON.parse(answerSdpString); // Answer should be just the SDP object
         peerConnection.signal(answer);
-        console.log("Submitted peer's answer.");
+        console.log("Submitted peer's answer to local PeerConnection.");
         if (incomingAnswerSdpInputModal) incomingAnswerSdpInputModal.value = "";
+        // UI: initiatorWaitsForAnswerDivModal can be hidden now, connection will proceed or fail.
+        if (initiatorWaitsForAnswerDivModal) initiatorWaitsForAnswerDivModal.style.display = 'none';
+        if (outgoingSignalDivModal) outgoingSignalDivModal.style.display = 'none'; // Hide the offer too
+        alert("Answer submitted. Waiting for connection...");
+
     } catch (err) {
-        alert("Invalid Answer SDP format.");
+        alert("Invalid Answer SDP format. It should be a JSON object.");
         console.error("Error parsing answer SDP:", err);
     }
 }
@@ -352,7 +445,8 @@ function cleanupPeerConnection() {
         peerConnection = null;
     }
     if (chatViewArea) chatViewArea.style.display = 'none';
-    if (p2pManagementView) p2pManagementView.classList.remove('active-overlay');
+    // Do not hide p2pManagementView here, user might want to start another connection
+    // if (p2pManagementView) p2pManagementView.classList.remove('active-overlay');
 
     if (initialSetupView && !initialSetupView.classList.contains('active-overlay') && noChatView) {
         noChatView.style.display = 'flex';
@@ -370,34 +464,45 @@ function cleanupPeerConnection() {
     if (disconnectChatButtonHeader) disconnectChatButtonHeader.style.display = 'none';
 
     chatPartnerID = null;
+
+    // Reset P2P modal to its initial state (showing both options)
     // Modal fields
+    if (peerIdInputModal) peerIdInputModal.value = '';
+    if (initialMessageInputModal) initialMessageInputModal.value = '';
+    if (incomingChatPackageInputModal) incomingChatPackageInputModal.value = '';
     if (outgoingSignalTextareaModal) outgoingSignalTextareaModal.value = '';
     if (incomingAnswerSdpInputModal) incomingAnswerSdpInputModal.value = '';
-    if (localIceCandidatesOutputModal) localIceCandidatesOutputModal.value = '';
-    if (remoteIceCandidateInputModal) remoteIceCandidateInputModal.value = '';
-    if (peerIdInputModal) peerIdInputModal.value = '';
-    if (incomingOfferSdpInputModal) incomingOfferSdpInputModal.value = '';
-    if (incomingOfferPeerIdModal) incomingOfferPeerIdModal.value = '';
+    if (localIceCandidatesOutputModal) localIceCandidatesOutputModal.value = ''; // If using
+    if (remoteIceCandidateInputModal) remoteIceCandidateInputModal.value = '';   // If using
 
-    if (initiateChatDivModal) initiateChatDivModal.style.display = 'block';
-    if (receiveOfferDivModal) receiveOfferDivModal.style.display = 'block';
+    if (chatInitiationSectionModal) chatInitiationSectionModal.style.display = 'block';
+    if (pasteRequestSectionModal) pasteRequestSectionModal.style.display = 'block';
     if (signalingExchangeAreaModal) signalingExchangeAreaModal.style.display = 'none';
     if (initiatorWaitsForAnswerDivModal) initiatorWaitsForAnswerDivModal.style.display = 'none';
+    if (outgoingSignalDivModal) outgoingSignalDivModal.style.display = 'block'; // Ensure this is visible for next use
 }
 
 
-// --- initializePeerEvents (Refactored for new UI) ---
-function initializePeerEvents(currentPeer) {
+// --- initializePeerEvents (Refactored for new UI and packaged data) ---
+function initializePeerEvents(currentPeer, initialMessageForOffer = null) {
     currentPeer.on('signal', data => {
         console.log('SIGNAL:', JSON.stringify(data));
-        if (data.type === 'offer' || data.type === 'answer') {
-            if (outgoingSignalTextareaModal) outgoingSignalTextareaModal.value = JSON.stringify(data);
-            if (data.type === 'offer') {
-                alert("Offer SDP generated. Copy from 'Your Outgoing Signal' textarea and send to your peer.");
-                if (initiatorWaitsForAnswerDivModal) initiatorWaitsForAnswerDivModal.style.display = 'block';
-            } else {
-                alert("Answer SDP generated. Copy from 'Your Outgoing Signal' textarea and send back to the initiator.");
-            }
+        if (data.type === 'offer') {
+            // Package offer with initial message and sender info
+            const offerPackage = {
+                type: 'chat-request-package',
+                offerSdp: data,
+                initialMessage: initialMessageForOffer || "", // Include the initial message
+                senderId: localUserProfile.userId,
+                senderDisplayName: localUserProfile.displayName
+            };
+            if (outgoingSignalTextareaModal) outgoingSignalTextareaModal.value = JSON.stringify(offerPackage, null, 2);
+            alert("Chat Request Data generated. Copy from 'Your Outgoing Data' textarea and send to your peer.");
+            // UI for waiting for answer is already handled by sendInitialChatRequest
+        } else if (data.type === 'answer') {
+            // This is just the answer SDP, no need to package further for sending back.
+            if (outgoingSignalTextareaModal) outgoingSignalTextareaModal.value = JSON.stringify(data, null, 2);
+            alert("Answer SDP generated. Copy from 'Your Outgoing Data' textarea and send back to the initiator.");
         } else if (data.candidate) {
             if (localIceCandidatesOutputModal) {
                  localIceCandidatesOutputModal.value += JSON.stringify(data.candidate) + '\n\n';
@@ -500,10 +605,17 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (connectPeerButtonModal) connectPeerButtonModal.addEventListener('click', initiateChatRequest);
-    if (processOfferButtonModal) processOfferButtonModal.addEventListener('click', processIncomingOffer);
+    if (sendInitialMessageButtonModal) sendInitialMessageButtonModal.addEventListener('click', sendInitialChatRequest);
+    if (processIncomingPackageButtonModal) processIncomingPackageButtonModal.addEventListener('click', handleIncomingChatPackage);
     if (submitIncomingAnswerButtonModal) submitIncomingAnswerButtonModal.addEventListener('click', submitPeerAnswer);
-    if (addRemoteIceCandidateButtonModal) addRemoteIceCandidateButtonModal.addEventListener('click', handleAddRemoteIceCandidate);
+
+    // Check if addRemoteIceCandidateButtonModal exists before adding listener
+    if (addRemoteIceCandidateButtonModal) {
+        addRemoteIceCandidateButtonModal.addEventListener('click', handleAddRemoteIceCandidate);
+    } else {
+        // This is fine for trickle:false, just a note if we enable trickle:true later
+        // console.warn("'add-remote-ice-candidate-button' not found in DOM. ICE candidate functionality might be limited if trickle:true is used later.");
+    }
 
     if (disconnectChatButtonHeader) {
         disconnectChatButtonHeader.addEventListener('click', () => {
@@ -539,6 +651,27 @@ window.addEventListener('DOMContentLoaded', () => {
 
     if (exportChatButtonHeader) exportChatButtonHeader.addEventListener('click', handleExportChat);
 
+    if (copyUserIdButton) {
+        copyUserIdButton.addEventListener('click', () => {
+            if (localUserProfile && localUserProfile.userId) {
+                navigator.clipboard.writeText(localUserProfile.userId)
+                    .then(() => {
+                        const originalText = copyUserIdButton.textContent;
+                        copyUserIdButton.textContent = '✓'; // Checkmark for copied
+                        copyUserIdButton.classList.add('copy-id-feedback');
+                        setTimeout(() => {
+                            copyUserIdButton.textContent = '📋'; // Restore icon
+                            copyUserIdButton.classList.remove('copy-id-feedback');
+                        }, 1500);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy User ID: ', err);
+                        alert('Failed to copy ID. Your browser might not support this feature or permission was denied.');
+                    });
+            }
+        });
+    }
+
     // Initial UI state based on profile
     if (!localUserProfile || !localUserProfile.userId) {
         if (initialSetupView) initialSetupView.classList.add('active-overlay');
@@ -551,10 +684,34 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     // Call cleanup to ensure P2P elements are in their default states,
     // but not affecting the initialSetupView or noChatView which are handled above.
-    // cleanupPeerConnection(); // This might hide noChatView if called unconditionally.
-    // Selective reset for P2P modal elements if needed, or rely on open modal to reset.
     if (messageInputBox) messageInputBox.disabled = true; // Ensure disabled initially
     if (sendMessageButtonBox) sendMessageButtonBox.disabled = true;
+
+    // --- Font Size Toggle Setup ---
+    const savedFontSize = localStorage.getItem(FONT_SIZE_STORAGE_KEY);
+    if (savedFontSize && FONT_SIZE_CLASSES.includes(savedFontSize)) {
+        applyFontSize(savedFontSize);
+    } else {
+        applyFontSize(FONT_SIZE_CLASSES[0]); // Default to normal
+    }
+
+    if (fontSizeToggleButton) {
+        fontSizeToggleButton.addEventListener('click', () => {
+            let currentSizeClass = FONT_SIZE_CLASSES[0]; // Default
+            // Find current applied class from appContainer
+            if(appContainer) {
+                for (const cls of FONT_SIZE_CLASSES) {
+                    if (appContainer.classList.contains(cls)) {
+                        currentSizeClass = cls;
+                        break;
+                    }
+                }
+            }
+            let currentIndex = FONT_SIZE_CLASSES.indexOf(currentSizeClass);
+            let nextIndex = (currentIndex + 1) % FONT_SIZE_CLASSES.length;
+            applyFontSize(FONT_SIZE_CLASSES[nextIndex]);
+        });
+    }
 });
 
 function handleExportChat() {
@@ -601,4 +758,33 @@ function handleExportChat() {
     URL.revokeObjectURL(url);
 
     alert(`Chat history with ${chatPartnerID} prepared for download.`);
+}
+
+// --- Accessibility Functions ---
+function applyFontSize(sizeClass) {
+    if (!appContainer) {
+        console.warn("App container not cached, cannot apply font size.");
+        return;
+    }
+    // Remove any existing font size classes
+    FONT_SIZE_CLASSES.forEach(cls => appContainer.classList.remove(cls));
+
+    // Add the new one
+    if (FONT_SIZE_CLASSES.includes(sizeClass)) {
+        appContainer.classList.add(sizeClass);
+        localStorage.setItem(FONT_SIZE_STORAGE_KEY, sizeClass);
+
+        // Update button text
+        if (fontSizeToggleButton) {
+            const classIndex = FONT_SIZE_CLASSES.indexOf(sizeClass);
+            fontSizeToggleButton.textContent = `Font Size: ${FONT_SIZE_LABELS[classIndex] || 'Normal'}`;
+        }
+    } else {
+        console.warn("Unknown font size class:", sizeClass, ".Applying default.");
+        appContainer.classList.add(FONT_SIZE_CLASSES[0]); // Default to normal
+        localStorage.setItem(FONT_SIZE_STORAGE_KEY, FONT_SIZE_CLASSES[0]);
+        if (fontSizeToggleButton) {
+            fontSizeToggleButton.textContent = `Font Size: ${FONT_SIZE_LABELS[0]}`;
+        }
+    }
 }
