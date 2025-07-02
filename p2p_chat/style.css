@@ -170,7 +170,7 @@ body {
 .dm-item-avatar {
     width: 40px; /* Slightly larger avatars for icon view */
     height: 40px;
-    border-radius: 25%; /* Squircle */
+    /* border-radius: 25%; Squircle - will be handled by global avatar style */
     background-color: var(--primary-accent);
     margin-right: 0; /* Hidden text, so no margin needed here */
     flex-shrink: 0;
@@ -186,7 +186,6 @@ body {
     position: absolute; /* Position relative to dm-item or avatar */
     bottom: 5px;
     right: 5px; /* Adjust positioning based on avatar size */
-    /* display: none; Hide status if sidebar is very narrow and avatar is small */
 }
 .dm-item-status.online { background-color: var(--success-color); }
 .dm-item-status.offline { background-color: var(--text-muted); }
@@ -194,16 +193,16 @@ body {
 /* Tooltip for DM item name on hover */
 .dm-item .dm-item-name-tooltip {
     visibility: hidden;
-    width: max-content; /* Auto width based on content */
-    max-width: 150px; /* Max width for tooltip */
+    width: max-content;
+    max-width: 150px;
     background-color: var(--tertiary-bg);
     color: var(--text-normal);
     text-align: center;
     border-radius: var(--border-radius-m);
     padding: 5px 8px;
     position: absolute;
-    z-index: 1001; /* Above other elements */
-    left: 105%; /* Position to the right of the sidebar item */
+    z-index: 1001;
+    left: 105%;
     top: 50%;
     transform: translateY(-50%);
     opacity: 0;
@@ -219,29 +218,27 @@ body {
 
 
 .user-panel {
-    padding: 10px; /* Adjusted padding */
+    padding: 10px;
     background-color: var(--tertiary-bg);
     display: flex;
     align-items: center;
-    justify-content: center; /* Center content if text is hidden */
-    height: 60px; /* Slightly taller user panel */
-    position: relative; /* For tooltip/settings modal positioning */
-    cursor: pointer; /* Indicates it's clickable for settings */
+    justify-content: center;
+    height: 60px;
+    position: relative;
+    cursor: pointer;
 }
 .user-info { /* This is the avatar in the new structure */
-    width: 40px; /* Match DM avatar size */
+    width: 40px;
     height: 40px;
-    border-radius: 25%; /* Squircle */
+    /* border-radius: 25%; Squircle - handled by global .user-avatar */
     background-color: var(--primary-accent);
-    margin-right: 0; /* Text is hidden or in tooltip */
+    margin-right: 0;
     flex-shrink: 0;
-    /* user-avatar class from previous step handles text centering & color */
 }
-.user-details { /* This contains name and ID, will be part of tooltip/modal */
+.user-details {
     display: none;
 }
 
-/* User panel tooltip (alternative to full modal for just showing name/ID) */
 .user-panel .user-panel-tooltip {
     visibility: hidden;
     width: max-content;
@@ -262,20 +259,18 @@ body {
     visibility: visible;
     opacity: 1;
 }
-.user-panel-tooltip .user-name { /* Styles for name inside tooltip */
+.user-panel-tooltip .user-name {
     font-weight: 600;
     font-size: var(--font-size-ui-normal);
     color: var(--text-bright);
-    display: block; /* Ensure it takes its own line */
+    display: block;
     margin-bottom: 3px;
 }
-.user-panel-tooltip .user-id-container { /* Styles for ID container inside tooltip */
+.user-panel-tooltip .user-id-container {
     font-size: var(--font-size-ui-small);
     color: var(--text-muted);
-    /* Flex display already handled by .user-id-container */
 }
-/* Hide the font size toggle button by default if it's in user-panel, will move to modal */
-#font-size-toggle-button.user-panel-button {
+#font-size-toggle-button.user-panel-button { /* This button is now in settings modal */
     display: none;
 }
 
@@ -286,9 +281,9 @@ body {
     color: var(--text-muted);
     cursor: pointer;
     padding: 2px;
-    font-size: var(--font-size-ui-normal); /* Using variable, was 0.95rem */
+    font-size: var(--font-size-ui-normal);
     line-height: 1;
-    display: inline-flex; /* Align icon nicely */
+    display: inline-flex;
     align-items: center;
     justify-content: center;
 }
@@ -296,11 +291,11 @@ body {
     color: var(--text-normal);
 }
 .copy-id-feedback {
-    color: var(--success-color) !important; /* Important to override default */
+    color: var(--success-color) !important;
     font-style: italic;
 }
 
-/* Ensure avatars can center text and apply squircle */
+/* Global Avatar Styles (User, DM, Chat Header) */
 .user-avatar, .dm-item-avatar, .chat-header-avatar {
     display: flex;
     align-items: center;
@@ -311,16 +306,14 @@ body {
     overflow: hidden;
     border-radius: 25%; /* Squircle shape */
 }
-/* Specific adjustment for chat-header-avatar if it's smaller */
-.chat-header-avatar {
-    width: 28px; /* If it's slightly smaller than sidebar avatars */
+.chat-header-avatar { /* Specific adjustments if needed */
+    width: 28px;
     height: 28px;
-    font-size: 0.8em; /* Adjust letter size if avatar is smaller */
+    font-size: 0.8em;
 }
 
-.user-id-sidebar-label { /* For the "ID: " text */
-    /* overflow: hidden; */ /* Not needed if user-details is hidden */
-    /* text-overflow: ellipsis; */
+.user-id-sidebar-label {
+    /* No specific style needed if text is in tooltip */
 }
 
 
@@ -333,41 +326,41 @@ body {
     position: relative;
 }
 
-/* Overlay Views (Setup, P2P Management) */
+/* Overlay Views (Auth, P2P Management, Settings) */
 .overlay-view {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(32, 34, 37, 0.8); /* Darker backdrop */
+    background-color: rgba(32, 34, 37, 0.8);
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 1000; /* High z-index */
+    z-index: 1000;
     padding: 20px;
 }
 .overlay-view.active-overlay {
     display: flex;
 }
 
-.card-overlay {
+.card-overlay { /* Base for auth-box, p2p-box, settings-box */
     background-color: var(--secondary-bg);
     padding: 25px 30px;
     border-radius: var(--border-radius-l);
     box-shadow: 0 8px 16px rgba(0,0,0,0.24);
     width: 100%;
     max-width: 480px;
-    text-align: left; /* Align labels and content left */
+    text-align: left;
 }
 .card-overlay h2 {
     font-family: var(--font-display);
     margin-bottom: 8px;
     color: var(--text-bright);
-    font-size: var(--font-size-h2); /* Using variable */
+    font-size: var(--font-size-h2);
     text-align: center;
 }
-.card-overlay h3 { /* For subheadings like "1. Initiate a New Chat" */
+.card-overlay h3 {
     font-size: var(--font-size-h3);
     color: var(--text-normal);
     margin-top: 15px;
@@ -379,20 +372,22 @@ body {
 .card-overlay p {
     margin-bottom: 20px;
     color: var(--text-muted);
-    font-size: var(--font-size-ui-normal); /* Using variable */
+    font-size: var(--font-size-ui-normal);
     text-align: center;
 }
 .card-overlay label {
     display: block;
     margin-bottom: 6px;
-    font-size: var(--font-size-ui-small); /* Using variable */
+    font-size: var(--font-size-ui-small);
     font-weight: 600;
     color: var(--text-muted);
     text-transform: uppercase;
     line-height: 1.2;
 }
 .card-overlay input[type="text"],
-.card-overlay textarea {
+.card-overlay input[type="password"],
+.card-overlay input[type="email"],
+.card-overlay textarea { /* General input/textarea style for overlays */
     width: 100%;
     padding: 10px 12px;
     border-radius: var(--border-radius-s);
@@ -400,263 +395,134 @@ body {
     background-color: var(--input-bg);
     color: var(--text-input);
     margin-bottom: 16px;
-    font-size: var(--font-size-ui-normal); /* Using variable */
+    font-size: var(--font-size-ui-normal);
 }
 .card-overlay textarea {
     min-height: 70px;
     resize: vertical;
 }
-.p2p-hr {
+.p2p-hr { /* Used in auth and p2p modal */
     border: none;
     height: 1px;
     background-color: var(--tertiary-bg);
     margin: 25px 0;
 }
 
-
-/* Chat View */
-.chat-view {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.chat-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    background-color: var(--header-bg);
-    border-bottom: 1px solid var(--tertiary-bg);
-    flex-shrink: 0;
-    height: 50px; /* Standard header height */
-}
-.chat-header-info {
-    display: flex;
-    align-items: center;
-}
-.chat-header-avatar { /* Similar to DM avatar */
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background-color: var(--primary-accent);
-    margin-right: 10px;
-}
-#chat-partner-name-header {
-    font-weight: 600;
-    font-size: var(--font-size-header); /* Using variable */
-    color: var(--text-bright);
-}
-.chat-header-actions .header-button {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: var(--font-size-header); /* Using variable, adjusted for icon size */
-    padding: 6px;
-    margin-left: 8px;
-    cursor: pointer;
-    line-height: 1; /* Ensure icon is centered */
-}
-.chat-header-actions .header-button:hover {
-    color: var(--text-normal);
-}
-
-
-.messages-list {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 0 20px 20px 20px; /* No top padding, messages handle their own margin-top */
-    /* display: flex; flex-direction: column-reverse; /* New messages at bottom */
-    /* The above is good, but JS scroll to bottom after adding new message is more reliable with normal column flow */
-    display: flex;
-    flex-direction: column; /* JS will scroll this */
-}
-
-.message-wrapper { /* This wrapper will get self/peer class */
-    display: flex; /* To allow avatar and content side-by-side if desired */
-    max-width: 85%; /* Don't let messages take full width */
-    margin-top: 17px; /* Discord-like spacing */
-    word-wrap: break-word; /* For long words without spaces */
-    position: relative;
-}
-.message-wrapper:first-child {
-    margin-top: 20px; /* More space for the very first message */
-}
-
-/* Avatar next to message (optional, can be enabled) */
-/*
-.message-wrapper .msg-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: var(--primary-accent);
-    margin-right: 15px;
-    flex-shrink: 0;
-}
-*/
-
-.message-content-wrapper { /* Holds sender+timestamp and text */
-    padding: 8px 12px;
-    border-radius: var(--border-radius-l);
-    line-height: 1.4;
-    white-space: pre-wrap; /* Respects newlines and multiple spaces in text */
-}
-
-.message-wrapper.self {
-    align-self: flex-end; /* Pushes the whole wrapper to the right */
-}
-.message-wrapper.self .message-content-wrapper {
-    /* background-color: var(--primary-accent); */ /* Original self bubble color */
-    background-color: transparent; /* Remove distinct background for self messages */
-    color: var(--text-normal); /* Standard text color, ensure it's readable on --content-bg */
-    /* border-bottom-right-radius: var(--border-radius-s); */ /* Keep if you want shape, remove if fully plain */
-    /* padding: 8px 12px; */ /* Keep padding for text spacing */
-    /* No border needed if it's plain text */
-}
-/* We might need to ensure the text itself has enough padding if the wrapper's padding was for the bubble */
-.message-wrapper.self .message-text {
-    /* Any specific styling for self message text if needed */
-}
-
-
-.message-wrapper.peer {
-    align-self: flex-start; /* Pushes the whole wrapper to the left */
-}
-.message-wrapper.peer .message-content-wrapper {
-    background-color: var(--interactive-bg);
-    color: var(--text-normal);
-    border-bottom-left-radius: var(--border-radius-s);
-}
-
-.message-sender { /* Displayed above the message text */
-    font-weight: 500;
-    font-size: var(--font-size-ui-normal); /* Using variable */
-    margin-bottom: 3px;
-    color: var(--text-bright);
-}
-.message-wrapper.peer .message-sender {
-    /* color: #some-peer-specific-color; Can be set via JS if needed */
-}
-
-.message-timestamp { /* Displayed next to sender or on hover */
-    font-size: var(--font-size-ui-small); /* Using variable */
-    color: var(--text-muted);
-    margin-left: 8px;
-}
-.message-text {
-    font-size: var(--font-size-chat-text); /* Using variable */
-}
-
-.message-input-box {
-    display: flex;
-    padding: 10px 20px;
-    background-color: var(--content-bg); /* Match chat area bg */
-    border-top: 1px solid var(--tertiary-bg);
-    flex-shrink: 0;
-    align-items: center;
-}
-.attach-button {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: 1.3rem;
-    padding: 0 10px 0 0; /* Right padding to space from input */
-    cursor: pointer;
-    line-height: 1;
-    align-self: center;
-}
-.attach-button:hover {
-    color: var(--primary-accent);
-}
-
-#message-input {
-    flex-grow: 1;
-    padding: 10px 12px;
-    border-radius: var(--border-radius-m);
-    border: none;
-    background-color: var(--interactive-bg); /* Slightly lighter than main bg */
-    color: var(--text-input);
-    font-size: var(--font-size-chat-text); /* Using variable */
-    margin-right:10px;
-    outline: none;
-}
-#message-input::placeholder {
-    color: var(--text-muted);
-}
-.send-button {
-    background: none; /* Icon button */
-    border: none;
-    color: var(--text-muted);
-    font-size: var(--font-size-header); /* Using variable, was 1.5rem for icon */
-    padding: 5px;
-    cursor: pointer;
-    transition: color 0.2s;
-}
-.send-button:hover {
-    color: var(--primary-accent);
-}
-
-
-/* No Chat Selected View */
-.no-chat-selected-view {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 20px;
-    color: var(--text-muted);
-}
-.no-chat-selected-view h2 {
-    color: var(--text-bright);
-    margin-bottom: 10px;
-    font-family: var(--font-display);
-    font-weight: 600;
-}
+/* Chat View & Components */
+.chat-view { /* ... */ }
+.chat-header { /* ... */ }
+.chat-header-info { /* ... */ }
+/* .chat-header-avatar is covered by global avatar style */
+#chat-partner-name-header { /* ... */ }
+.chat-header-actions .header-button { /* ... */ }
+.messages-list { /* ... */ }
+.message-wrapper { /* ... */ }
+.message-content-wrapper { /* ... */ }
+.message-wrapper.self .message-content-wrapper { /* ... */ }
+.message-wrapper.self .message-text { /* ... */ }
+.message-wrapper.peer .message-content-wrapper { /* ... */ }
+.message-sender { /* ... */ }
+.message-wrapper.peer .message-sender { /* ... */ }
+.message-timestamp { /* ... */ }
+.message-text { /* ... */ }
+.message-input-box { /* ... */ }
+.attach-button { /* ... */ }
+#message-input { /* ... */ }
+#message-input::placeholder { /* ... */ }
+.send-button { /* ... */ }
+.send-button:hover { /* ... */ }
+.no-chat-selected-view { /* ... */ }
+.no-chat-selected-view h2 { /* ... */ }
 
 /* General Button Styling */
-button { /* Base button style */
-    font-family: var(--font-primary);
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.15s ease-in-out, opacity 0.15s ease-in-out;
-    border-radius: var(--border-radius-s);
-    border: none;
-    font-size: var(--font-size-button); /* Apply base button font size */
-}
-.button-primary {
-    background-color: var(--primary-accent);
-    color: var(--text-bright);
-    padding: 10px 16px;
-    /* font-size already set by base button rule */
-}
-.button-primary:hover {
-    background-color: var(--primary-accent-hover);
-}
-.button-secondary {
-    background-color: var(--interactive-bg);
-    color: var(--text-normal);
-    padding: 10px 16px;
-    /* font-size already set by base button rule */
-}
-.button-secondary:hover {
-    background-color: var(--interactive-hover-bg);
+button { /* ... */ }
+.button-primary { /* ... */ }
+.button-primary:hover { /* ... */ }
+.button-secondary { /* ... */ }
+.button-secondary:hover { /* ... */ }
+.user-panel-button { /* Was for font toggle, now that's in settings modal */
+    display: none; /* Hide if not used elsewhere */
 }
 
-.user-panel-button { /* Style for the new font size button */
+/* Auth View Specifics */
+.auth-box { max-width: 420px; }
+.auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid var(--tertiary-bg); }
+.tab-button { flex-grow: 1; padding: 10px 15px; background: none; border: none; border-bottom: 3px solid transparent; color: var(--text-muted); font-size: 1rem; font-weight: 500; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
+.tab-button:hover { color: var(--text-normal); }
+.tab-button.active { color: var(--primary-accent); border-bottom-color: var(--primary-accent); }
+.auth-tab-content { display: none; }
+.auth-tab-content.active-tab { display: block; }
+.auth-tab-content h2 { text-align: left; font-size: 1.3rem; margin-bottom: 15px; }
+.auth-tab-content form label { text-transform: none; font-size: var(--font-size-ui-small); color: var(--text-muted); margin-bottom: 4px; display: block; }
+.auth-tab-content form input[type="text"],
+.auth-tab-content form input[type="password"],
+.auth-tab-content form input[type="email"] { margin-bottom: 12px; font-size: var(--font-size-ui-normal); }
+.auth-tab-content form button[type="submit"] { margin-top: 10px; }
+.auth-options { margin-top: 15px; text-align: center; }
+.auth-options p { font-size: var(--font-size-ui-small); color: var(--text-muted); margin-bottom: 10px; }
+.auth-options .button-secondary { margin-bottom: 10px; }
+.profile-import-section p { font-size: var(--font-size-ui-small); }
+
+/* Settings Modal Specifics */
+.settings-box { max-width: 520px; text-align: left; }
+.settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--tertiary-bg); }
+.settings-header h2 { font-family: var(--font-display); color: var(--text-bright); font-size: var(--font-size-h2); margin-bottom: 0; text-align: left; }
+.modal-close-button { font-size: 1.2rem; padding: 5px; }
+.settings-content { max-height: 70vh; overflow-y: auto; padding-right: 10px; }
+.settings-section { margin-bottom: 25px; }
+.settings-section:last-child { margin-bottom: 0; }
+.settings-section h3 { font-family: var(--font-primary); font-weight: 600; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid var(--tertiary-bg); padding-bottom: 8px; }
+.setting-item { margin-bottom: 15px; display: flex; flex-direction: column; }
+.setting-item label:not(.file-input-label) { font-size: var(--font-size-ui-small); color: var(--text-muted); margin-bottom: 5px; font-weight: 500; text-transform: none; }
+.settings-value-display { font-size: var(--font-size-ui-normal); color: var(--text-normal); padding: 8px 0; word-break: break-all; }
+.settings-id-container { display: flex; align-items: center; font-size: var(--font-size-ui-normal); }
+.settings-id-container #settings-userid-display { flex-grow: 1; margin-right: 10px; }
+.settings-section .button-secondary,
+.settings-section .button-primary { width: 100%; margin-top: 5px; }
+.full-width-button { width: 100%; display: block; text-align: center; }
+.hidden-file-input { display: none; }
+.file-input-label { cursor: pointer; display: inline-block; padding: 10px 16px; }
+
+/* Profile Picture Preview in Settings */
+.profile-picture-preview-container {
+    width: 100px;
+    height: 100px;
+    border-radius: 25%; /* Squircle */
+    background-color: var(--tertiary-bg);
+    margin: 5px 0 10px 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--interactive-bg);
+}
+#profile-picture-preview {
     width: 100%;
-    margin-top: 8px;
-    padding: 6px 10px;
-    font-size: 0.85rem; /* Slightly smaller than main buttons, or use var(--font-size-ui-small) */
-    /* It will inherit .button-secondary styles if class is applied, or define its own */
-    /* If it doesn't have .button-secondary, define full style: */
-    /* background-color: var(--interactive-bg); */
-    /* color: var(--text-normal); */
+    height: 100%;
+    object-fit: cover;
 }
-.user-panel-button:hover {
-    /* background-color: var(--interactive-hover-bg); */
+.avatar-placeholder { /* For the letter placeholder in preview */
+    font-size: 2.5rem;
+    color: var(--text-muted);
+    display: flex; /* Already flex by parent, but good for self-containment */
+    align-items: center;
+    justify-content: center;
 }
+.settings-input { /* Style for general text inputs within settings modal, like username change */
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--border-radius-s);
+    border: 1px solid var(--tertiary-bg);
+    background-color: var(--input-bg);
+    color: var(--text-input);
+    font-size: var(--font-size-ui-normal);
+    margin-bottom: 5px;
+}
+.settings-input:focus {
+    outline: none;
+    border-color: var(--primary-accent);
+}
+
 
 .settings-select {
     width: 100%;
@@ -666,142 +532,20 @@ button { /* Base button style */
     background-color: var(--input-bg);
     color: var(--text-input);
     font-size: var(--font-size-ui-normal);
-    margin-top: 4px; /* Space from label */
+    margin-top: 4px;
 }
 .settings-select:focus {
     outline: none;
     border-color: var(--primary-accent);
 }
 
-
 /* Scrollbar Styling */
-::-webkit-scrollbar {
-    width: 8px; /* Narrower scrollbar */
-    height: 8px;
-}
-::-webkit-scrollbar-corner {
-    background: transparent;
-}
-::-webkit-scrollbar-thumb {
-    background-color: var(--tertiary-bg); /* Darker thumb */
-    border-radius: 4px;
-}
-::-webkit-scrollbar-track {
-    background-color: var(--secondary-bg); /* Matches sidebar bg */
-}
-.dm-list::-webkit-scrollbar-track { /* Specific for DM list if needed */
-    background-color: transparent; /* Make it blend more with sidebar */
-}
-.dm-list::-webkit-scrollbar-thumb {
-    background-color: var(--tertiary-bg);
-}
+::-webkit-scrollbar { /* ... */ }
+::-webkit-scrollbar-corner { /* ... */ }
+::-webkit-scrollbar-thumb { /* ... */ }
+::-webkit-scrollbar-track { /* ... */ }
+.dm-list::-webkit-scrollbar-track { /* ... */ }
+.dm-list::-webkit-scrollbar-thumb { /* ... */ }
+.hidden { display: none !important; }
 
-
-/* Utility classes */
-.hidden {
-    display: none !important;
-}
-
-/* Settings Modal */
-.settings-box { /* Extends .card-overlay, but might need specifics */
-    max-width: 520px; /* Slightly wider for more content */
-    text-align: left; /* Override general card-overlay text-align if it was center */
-}
-.settings-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--tertiary-bg);
-}
-.settings-header h2 {
-    font-family: var(--font-display);
-    color: var(--text-bright);
-    font-size: var(--font-size-h2);
-    margin-bottom: 0; /* Remove default h2 margin */
-    text-align: left; /* Override card-overlay h2 text-align if it was center */
-}
-.modal-close-button { /* For the X button */
-    font-size: 1.2rem; /* Adjust size of X */
-    padding: 5px;
-}
-
-.settings-content {
-    max-height: 70vh; /* Allow content to scroll if too long */
-    overflow-y: auto;
-    padding-right: 10px; /* Space for scrollbar */
-}
-.settings-section {
-    margin-bottom: 25px;
-}
-.settings-section:last-child {
-    margin-bottom: 0;
-}
-.settings-section h3 {
-    font-family: var(--font-primary);
-    font-weight: 600;
-    font-size: 0.8rem; /* Smaller than modal h2 */
-    color: var(--text-muted);
-    text-transform: uppercase;
-    margin-bottom: 15px;
-    border-bottom: 1px solid var(--tertiary-bg);
-    padding-bottom: 8px;
-}
-.setting-item {
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column; /* Stack label and control/value */
-}
-.setting-item label:not(.file-input-label) { /* Labels for static text or above inputs */
-    font-size: var(--font-size-ui-small);
-    color: var(--text-muted);
-    margin-bottom: 5px;
-    font-weight: 500;
-    text-transform: none; /* Override card-overlay label if it was uppercase */
-}
-.settings-value-display { /* For spans showing username/ID */
-    font-size: var(--font-size-ui-normal);
-    color: var(--text-normal);
-    padding: 8px 0; /* Add some padding if it's just text */
-    word-break: break-all; /* For long UserIDs */
-}
-.settings-id-container { /* user-id-container inside settings */
-    display: flex;
-    align-items: center;
-    font-size: var(--font-size-ui-normal); /* Match value display */
-}
-.settings-id-container #settings-userid-display {
-    flex-grow: 1;
-    margin-right: 10px;
-}
-/* Buttons inside settings */
-.settings-section .button-secondary,
-.settings-section .button-primary {
-    width: 100%; /* Make buttons full width of their setting-item container */
-    margin-top: 5px; /* Space if label is above */
-}
-.full-width-button { /* Reusable class if needed elsewhere */
-    width: 100%;
-    display: block; /* Ensure it takes full width if it's an inline element like a label */
-    text-align: center;
-}
-
-/* Hidden file input styling */
-.hidden-file-input {
-    display: none;
-}
-.file-input-label { /* Style the label to look like a button */
-    cursor: pointer;
-    display: inline-block; /* Or block if it's .full-width-button */
-    padding: 10px 16px; /* Match button padding */
-    /* Inherits .button-secondary styles if class is applied */
-}
-
-/* Adjustments for user-panel-button if it's still used outside modal */
-.user-panel-button {
-    width: calc(100% - 20px); /* Adjust width if padding is 10px on user-panel */
-    margin: 8px auto 0 auto; /* Center it if user-panel is flex center */
-    display: block; /* To take width and margin auto */
-    font-size: 0.8rem;
-}
+[end of p2p_chat/style.css]

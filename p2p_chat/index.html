@@ -39,70 +39,111 @@
 
         <!-- Main Content: Chat Area / Setup Views -->
         <div class="main-content">
-            <!-- Initial Setup View (Overlay) -->
-            <div id="initial-setup-view" class="overlay-view active-overlay">
-                <div class="setup-box card-overlay">
-                    <h2>Welcome to P2P Chat!</h2>
-                    <p>Please set your username to get started, or import an existing profile.</p>
-                    <label for="display-name-input">Username:</label>
-                    <input type="text" id="display-name-input" placeholder="Enter your username">
-                    <button id="save-profile-button" class="button-primary">Save Profile & Get User ID</button>
+            <!-- Auth View (Overlay) - Replaces initial-setup-view -->
+            <div id="auth-view" class="overlay-view active-overlay"> <!-- Initially active -->
+                <div class="auth-box card-overlay"> <!-- auth-box might need specific styling -->
+                    <div class="auth-tabs">
+                        <button class="tab-button active" data-auth-tab="login-tab-content">Login</button>
+                        <button class="tab-button" data-auth-tab="signup-tab-content">Sign Up</button>
+                    </div>
+
+                    <!-- Login Tab Content -->
+                    <div id="login-tab-content" class="auth-tab-content active-tab">
+                        <h2>Login</h2>
+                        <form id="login-form">
+                            <label for="login-username">Username:</label>
+                            <input type="text" id="login-username" name="username" placeholder="Enter your username" required>
+                            <label for="login-password">Password:</label>
+                            <input type="password" id="login-password" name="password" placeholder="Enter your password" required>
+                            <button type="submit" class="button-primary full-width-button">Login</button>
+                        </form>
+                        <div class="auth-options">
+                            <button id="login-with-passkey-button" class="button-secondary full-width-button">Login with Passkey</button>
+                        </div>
+                    </div>
+
+                    <!-- Signup Tab Content -->
+                    <div id="signup-tab-content" class="auth-tab-content" style="display: none;">
+                        <h2>Create Account</h2>
+                        <form id="signup-form">
+                            <label for="signup-username">Username:</label>
+                            <input type="text" id="signup-username" name="username" placeholder="Choose a username (min. 3 chars)" required minlength="3">
+                            <label for="signup-email">Email (Optional):</label>
+                            <input type="email" id="signup-email" name="email" placeholder="your@email.com">
+                            <label for="signup-password">Password:</label>
+                            <input type="password" id="signup-password" name="password" placeholder="Create a password (min. 6 chars)" required minlength="6">
+                            <label for="signup-confirm-password">Confirm Password:</label>
+                            <input type="password" id="signup-confirm-password" name="confirmPassword" placeholder="Confirm password" required>
+                            <button type="submit" class="button-primary full-width-button">Sign Up</button>
+                        </form>
+                         <div class="auth-options">
+                            <p>After signing up with username/password, you can register a Passkey in your settings for future logins.</p>
+                        </div>
+                    </div>
 
                     <hr class="p2p-hr" style="margin: 20px 0;">
 
-                    <label for="import-profile-file-input" class="button-secondary file-input-label full-width-button">Import Profile</label>
-                    <input type="file" id="import-profile-file-input" class="hidden-file-input" accept=".json">
+                    <div class="profile-import-section">
+                         <p style="text-align:center; margin-bottom:10px;">Or, if you have an exported P2P profile file (from previous version):</p>
+                        <label for="import-profile-file-input" class="button-secondary file-input-label full-width-button">Import Old Profile (.json)</label>
+                        <input type="file" id="import-profile-file-input" class="hidden-file-input" accept=".json">
+                    </div>
                 </div>
             </div>
 
             <!-- P2P Connection Management View (Overlay) -->
-            <div id="p2p-management-view" class="overlay-view">
+            <!-- P2P Connection Management View (Overlay) - This will be deprecated or repurposed for P2P call signaling -->
+            <div id="p2p-management-view" class="overlay-view" style="display: none;">
                 <div class="p2p-box card-overlay">
-                    <h2 id="p2p-modal-title">Start or Respond to a Chat</h2>
-
-                    <!-- Combined section for initiating or responding based on what user does -->
-                    <div id="chat-initiation-section">
-                        <h3>Start a New Chat</h3>
+                    <h2 id="p2p-modal-title">P2P Connection Utility</h2>
+                    <p>This modal is for direct P2P setup (e.g., for calls if server signaling fails, or for testing). Regular chat is server-based.</p>
+                    <!-- Content from old P2P setup can remain here, but hidden or less prominent -->
+                    <div id="old-p2p-initiate-chat-div" style="display:none;">
+                        <h3>1. Initiate a New P2P Session</h3>
                         <label for="peer-id-input-modal">Peer's User ID:</label>
                         <input type="text" id="peer-id-input-modal" placeholder="Enter Peer's User ID">
-                        <label for="initial-message-input-modal">Your first message (optional):</label>
+                        <label for="initial-message-input-modal">Initial Message (optional, for old P2P):</label>
                         <textarea id="initial-message-input-modal" rows="2" placeholder="Say hello..."></textarea>
-                        <button id="send-initial-message-button-modal" class="button-primary">Send Message & Create Request</button>
+                        <button id="send-initial-message-button-modal" class="button-primary">Generate P2P Offer</button>
                     </div>
-
-                    <hr class="p2p-hr">
-
-                    <div id="paste-request-section">
-                        <h3>Process Received Chat Request</h3>
-                        <label for="incoming-chat-package-input-modal">Paste Chat Request Data from Peer:</label>
-                        <textarea id="incoming-chat-package-input-modal" rows="4" placeholder="Paste the entire request data your peer sent you..."></textarea>
-                        <button id="process-incoming-package-button-modal" class="button-primary">Process Request & Respond</button>
+                    <div id="old-p2p-paste-request-section" style="display:none;">
+                        <h3>2. Or, Process Received P2P Offer</h3>
+                        <label for="incoming-chat-package-input-modal">Paste P2P Offer Data from Peer:</label>
+                        <textarea id="incoming-chat-package-input-modal" rows="4" placeholder="Paste the P2P offer data..."></textarea>
+                        <button id="process-incoming-package-button-modal" class="button-primary">Process P2P Offer</button>
                     </div>
-
-                    <!-- This area is shown after initiating or processing an offer/package -->
                     <div id="signaling-exchange-area-modal" style="display: none;">
-                        <h4>Signaling Data (Manual Copy/Paste)</h4>
-
-                        <div id="outgoing-signal-div-modal"> <!-- For user to copy their Offer+Msg or just Answer -->
-                            <label for="outgoing-signal-textarea-modal">Your Outgoing Data (Copy this ENTIRE block and send to peer):</label>
-                            <textarea id="outgoing-signal-textarea-modal" rows="5" readonly placeholder="Your Offer or Answer data will appear here..."></textarea>
+                        <h4>P2P Signaling Data</h4>
+                        <div id="outgoing-signal-div-modal">
+                            <label for="outgoing-signal-textarea-modal">Your Outgoing P2P Signal:</label>
+                            <textarea id="outgoing-signal-textarea-modal" rows="5" readonly></textarea>
                         </div>
-
-                        <div id="initiator-waits-for-answer-div-modal" style="display:none;"> <!-- Only for original initiator -->
-                            <label for="incoming-answer-sdp-input-modal">Peer's Answer SDP (Paste Answer from Peer here):</label>
-                            <textarea id="incoming-answer-sdp-input-modal" rows="5" placeholder="Paste peer's Answer SDP here..."></textarea>
-                            <button id="submit-incoming-answer-button-modal" class="button-primary">Submit Peer's Answer</button>
+                        <div id="initiator-waits-for-answer-div-modal" style="display:none;">
+                            <label for="incoming-answer-sdp-input-modal">Peer's P2P Answer SDP:</label>
+                            <textarea id="incoming-answer-sdp-input-modal" rows="5"></textarea>
+                            <button id="submit-incoming-answer-button-modal" class="button-primary">Submit P2P Answer</button>
                         </div>
-                        <!-- For trickle:true - these elements would need to be added if used -->
-                        <!--
-                        <label for="local-ice-candidates-output">Your new ICE Candidates (send to peer as they appear):</label>
-                        <textarea id="local-ice-candidates-output" rows="3" readonly placeholder="Your new ICE candidates for the peer..."></textarea>
-                        <label for="remote-ice-candidate-input">Peer's ICE Candidate (paste from peer):</label>
-                        <input type="text" id="remote-ice-candidate-input" placeholder="Paste one ICE candidate string from peer">
-                        <button id="add-remote-ice-candidate-button" class="button-secondary">Add Peer's ICE Candidate</button>
-                        -->
                     </div>
-                    <button id="cancel-p2p-setup-button" class="button-secondary" style="margin-top: 20px;">Close</button>
+                    <button id="cancel-p2p-setup-button" class="button-secondary" style="margin-top: 20px;">Close P2P Utility</button>
+                </div>
+            </div>
+
+            <!-- Add Friend Modal View (Overlay) -->
+            <div id="add-friend-modal-view" class="overlay-view"> <!-- Initially hidden -->
+                <div class="add-friend-box card-overlay">
+                    <div class="settings-header">
+                        <h2>Add Friend</h2>
+                        <button id="close-add-friend-modal-button" class="icon-button modal-close-button" title="Close">❌</button>
+                    </div>
+                    <div class="settings-content">
+                        <p>You can add a friend with their unique UserID or Username.</p>
+                        <form id="add-friend-form">
+                            <label for="add-friend-input">Enter Username or UserID:</label>
+                            <input type="text" id="add-friend-input" class="settings-input" placeholder="ExampleUser or usr_abc123..." required>
+                            <button type="submit" id="send-friend-request-button" class="button-primary full-width-button" style="margin-top:15px;">Send Friend Request</button>
+                        </form>
+                        <div id="add-friend-status-message" class="status-message" style="margin-top: 10px; text-align: center;"></div>
+                    </div>
                 </div>
             </div>
 
@@ -157,6 +198,32 @@
                                     <span id="settings-userid-display" class="settings-value-display"></span>
                                     <button id="settings-copy-userid-button" class="icon-button" title="Copy User ID">📋</button>
                                 </div>
+                            </div>
+                            <div class="setting-item">
+                                <label for="profile-picture-file-input">Profile Picture (JPG, PNG, GIF - Max 20MB):</label>
+                                <div class="profile-picture-preview-container">
+                                    <img id="profile-picture-preview" src="#" alt="Profile Preview" style="display:none;">
+                                    <span class="avatar-placeholder" id="profile-picture-placeholder-avatar">U</span>
+                                </div>
+                                <input type="file" id="profile-picture-file-input" class="hidden-file-input" accept="image/jpeg,image/png,image/gif">
+                                <label for="profile-picture-file-input" class="button-secondary file-input-label" style="margin-top: 5px;">Choose Image</label>
+                                <button id="save-profile-picture-button" class="button-primary" style="margin-top: 10px; display:none;">Save Picture</button>
+                            </div>
+                            <div class="setting-item">
+                                <label for="settings-change-username-input">Change Username:</label>
+                                <input type="text" id="settings-change-username-input" class="settings-input" placeholder="New username (min. 3 chars)">
+                                <button id="settings-save-username-button" class="button-primary" style="margin-top: 5px;">Save Username</button>
+                            </div>
+                        </div>
+
+                        <div class="settings-section" id="settings-security-privacy-section">
+                            <h3>Security & Privacy</h3>
+                            <div class="setting-item toggle-setting">
+                                <label for="settings-search-visibility-toggle">Visible in User Search:</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="settings-search-visibility-toggle">
+                                    <span class="slider round"></span>
+                                </label>
                             </div>
                         </div>
 
