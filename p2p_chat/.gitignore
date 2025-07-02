@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+ENV/
+env/
+
+# IDE specific files
+.idea/
+.vscode/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Local config files (if any, might add specific ones later)
+*.local
+config.ini # Example if we decide to use a local config file with this name
+
+# Test artifacts
+.pytest_cache/
+coverage.xml
+htmlcov/

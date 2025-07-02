@@ -1,0 +1,551 @@
+/* style.css */
+:root {
+    /* Font Sizes */
+    --font-size-base: 15px;
+    --font-size-chat-text: 0.95rem;
+    --font-size-ui-small: 0.75rem;
+    --font-size-ui-normal: 0.9rem;
+    --font-size-header: 1rem; /* For chat partner name */
+    --font-size-button: 0.9rem;
+    --font-size-h2: 1.5rem;
+    --font-size-h3: 1.1rem; /* For modal subheadings */
+
+    /* Existing color and layout variables */
+    --primary-bg: #36393f;
+    --secondary-bg: #2f3136;
+    --tertiary-bg: #202225; /* Often used for borders or very dark elements */
+    --interactive-bg: #40444b; /* Input fields, message bubbles (peer) */
+    --interactive-hover-bg: #4f545c; /* Hover states for some elements */
+    --header-bg: var(--primary-bg); /* Chat header background */
+    --content-bg: var(--primary-bg); /* Main chat content background */
+
+    --text-normal: #dcddde;
+    --text-muted: #72767d; /* Timestamps, placeholder text */
+    --text-link: #00b0f4;
+    --text-bright: #ffffff;
+    --text-input: #f6f6f7; /* Text inside input fields */
+
+
+    --primary-accent: #5865f2; /* Discord Blurple */
+    --primary-accent-hover: #4e5adf;
+
+    --success-color: #43b581; /* Green */
+    --error-color: #f04747; /* Red */
+    --warning-color: #faa61a; /* Yellow */
+
+    --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-display: var(--font-primary); /* Keep it simple for now */
+
+    --border-radius-s: 3px;
+    --border-radius-m: 5px;
+    --border-radius-l: 8px;
+
+    --scrollbar-thumb-bg: var(--tertiary-bg);
+    --scrollbar-track-bg: var(--secondary-bg);
+    --input-bg: var(--tertiary-bg); /* Darker inputs */
+}
+
+/* Basic Reset & Body */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-primary);
+    background-color: var(--tertiary-bg); /* Fallback, app-container sets main view */
+    color: var(--text-normal);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    font-size: var(--font-size-base); /* Use variable for base size */
+}
+
+/* Font size modifier classes to be applied to .app-container */
+.font-scale-normal { /* Default, variables in :root are normal */ }
+
+.font-scale-large {
+    --font-size-base: 17px;
+    --font-size-chat-text: 1.05rem;
+    --font-size-ui-small: 0.85rem;
+    --font-size-ui-normal: 1rem;
+    --font-size-header: 1.1rem;
+    --font-size-button: 1rem;
+    --font-size-h2: 1.65rem;
+    --font-size-h3: 1.2rem;
+}
+.font-scale-larger {
+    --font-size-base: 19px;
+    --font-size-chat-text: 1.15rem;
+    --font-size-ui-small: 0.95rem;
+    --font-size-ui-normal: 1.1rem;
+    --font-size-header: 1.2rem;
+    --font-size-button: 1.1rem;
+    --font-size-h2: 1.8rem;
+    --font-size-h3: 1.3rem;
+}
+
+
+/* App Container - Main Layout */
+.app-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 72px; /* Narrower sidebar for icon-focus */
+    background-color: var(--secondary-bg);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    border-right: 1px solid var(--tertiary-bg);
+}
+
+.sidebar-header {
+    padding: 10px; /* Adjusted padding for narrower sidebar */
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center the button if it's the only item */
+}
+
+#initiate-new-chat-sidebar-button {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font-size: 1.75rem; /* Make the '+' larger */
+    line-height: 38px; /* Adjust for vertical centering of '+' */
+    text-align: center;
+    border-radius: 25%; /* Squircle */
+    margin: auto; /* Center in sidebar-header if it's flex */
+    font-weight: 300; /* Lighter plus sign */
+    color: var(--text-normal); /* Ensure good contrast on primary-accent bg */
+}
+#initiate-new-chat-sidebar-button:hover {
+    background-color: var(--primary-accent-hover); /* Use hover color */
+}
+
+
+.sidebar-header { /* Ensure this centers the button */
+    padding: 10px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dm-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scroll with tooltips */
+    padding: 8px 0;
+}
+
+.dm-item {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center avatar when text is hidden */
+    padding: 8px 10px; /* Consistent padding */
+    margin: 0 auto 2px auto; /* Center items and add margin */
+    width: calc(100% - 16px); /* Use available width with some margin */
+    border-radius: var(--border-radius-m);
+    cursor: pointer;
+    color: var(--text-muted);
+    position: relative; /* For tooltip positioning */
+}
+.dm-item:hover {
+    background-color: var(--interactive-bg);
+}
+.dm-item.active-dm {
+    background-color: var(--interactive-hover-bg);
+    color: var(--text-bright);
+}
+.dm-item.active-dm .dm-item-name-tooltip { /* Ensure tooltip is visible on active item too */
+    color: var(--text-bright);
+}
+
+
+.dm-item-avatar {
+    width: 40px; /* Slightly larger avatars for icon view */
+    height: 40px;
+    /* border-radius: 25%; Squircle - will be handled by global avatar style */
+    background-color: var(--primary-accent);
+    margin-right: 0; /* Hidden text, so no margin needed here */
+    flex-shrink: 0;
+}
+.dm-item-name {
+    display: none; /* Hide by default in narrow sidebar */
+}
+.dm-item-status {
+    width: 12px; /* Slightly larger status */
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--secondary-bg);
+    position: absolute; /* Position relative to dm-item or avatar */
+    bottom: 5px;
+    right: 5px; /* Adjust positioning based on avatar size */
+}
+.dm-item-status.online { background-color: var(--success-color); }
+.dm-item-status.offline { background-color: var(--text-muted); }
+
+/* Tooltip for DM item name on hover */
+.dm-item .dm-item-name-tooltip {
+    visibility: hidden;
+    width: max-content;
+    max-width: 150px;
+    background-color: var(--tertiary-bg);
+    color: var(--text-normal);
+    text-align: center;
+    border-radius: var(--border-radius-m);
+    padding: 5px 8px;
+    position: absolute;
+    z-index: 1001;
+    left: 105%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s, visibility 0.2s;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.dm-item:hover .dm-item-name-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+.user-panel {
+    padding: 10px;
+    background-color: var(--tertiary-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 60px;
+    position: relative;
+    cursor: pointer;
+}
+.user-info { /* This is the avatar in the new structure */
+    width: 40px;
+    height: 40px;
+    /* border-radius: 25%; Squircle - handled by global .user-avatar */
+    background-color: var(--primary-accent);
+    margin-right: 0;
+    flex-shrink: 0;
+}
+.user-details {
+    display: none;
+}
+
+.user-panel .user-panel-tooltip {
+    visibility: hidden;
+    width: max-content;
+    background-color: var(--tertiary-bg);
+    color: var(--text-normal);
+    border-radius: var(--border-radius-m);
+    padding: 8px 12px;
+    position: absolute;
+    z-index: 1001;
+    left: 105%;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s, visibility 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.user-panel:hover .user-panel-tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+.user-panel-tooltip .user-name {
+    font-weight: 600;
+    font-size: var(--font-size-ui-normal);
+    color: var(--text-bright);
+    display: block;
+    margin-bottom: 3px;
+}
+.user-panel-tooltip .user-id-container {
+    font-size: var(--font-size-ui-small);
+    color: var(--text-muted);
+}
+#font-size-toggle-button.user-panel-button { /* This button is now in settings modal */
+    display: none;
+}
+
+
+.icon-button {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px;
+    font-size: var(--font-size-ui-normal);
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.icon-button:hover {
+    color: var(--text-normal);
+}
+.copy-id-feedback {
+    color: var(--success-color) !important;
+    font-style: italic;
+}
+
+/* Global Avatar Styles (User, DM, Chat Header) */
+.user-avatar, .dm-item-avatar, .chat-header-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    overflow: hidden;
+    border-radius: 25%; /* Squircle shape */
+}
+.chat-header-avatar { /* Specific adjustments if needed */
+    width: 28px;
+    height: 28px;
+    font-size: 0.8em;
+}
+
+.user-id-sidebar-label {
+    /* No specific style needed if text is in tooltip */
+}
+
+
+/* Main Content Area */
+.main-content {
+    flex-grow: 1;
+    background-color: var(--content-bg);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Overlay Views (Auth, P2P Management, Settings) */
+.overlay-view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(32, 34, 37, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+.overlay-view.active-overlay {
+    display: flex;
+}
+
+.card-overlay { /* Base for auth-box, p2p-box, settings-box */
+    background-color: var(--secondary-bg);
+    padding: 25px 30px;
+    border-radius: var(--border-radius-l);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.24);
+    width: 100%;
+    max-width: 480px;
+    text-align: left;
+}
+.card-overlay h2 {
+    font-family: var(--font-display);
+    margin-bottom: 8px;
+    color: var(--text-bright);
+    font-size: var(--font-size-h2);
+    text-align: center;
+}
+.card-overlay h3 {
+    font-size: var(--font-size-h3);
+    color: var(--text-normal);
+    margin-top: 15px;
+    margin-bottom: 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--tertiary-bg);
+    padding-bottom: 5px;
+}
+.card-overlay p {
+    margin-bottom: 20px;
+    color: var(--text-muted);
+    font-size: var(--font-size-ui-normal);
+    text-align: center;
+}
+.card-overlay label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: var(--font-size-ui-small);
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+.card-overlay input[type="text"],
+.card-overlay input[type="password"],
+.card-overlay input[type="email"],
+.card-overlay textarea { /* General input/textarea style for overlays */
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--border-radius-s);
+    border: 1px solid var(--tertiary-bg);
+    background-color: var(--input-bg);
+    color: var(--text-input);
+    margin-bottom: 16px;
+    font-size: var(--font-size-ui-normal);
+}
+.card-overlay textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+.p2p-hr { /* Used in auth and p2p modal */
+    border: none;
+    height: 1px;
+    background-color: var(--tertiary-bg);
+    margin: 25px 0;
+}
+
+/* Chat View & Components */
+.chat-view { /* ... */ }
+.chat-header { /* ... */ }
+.chat-header-info { /* ... */ }
+/* .chat-header-avatar is covered by global avatar style */
+#chat-partner-name-header { /* ... */ }
+.chat-header-actions .header-button { /* ... */ }
+.messages-list { /* ... */ }
+.message-wrapper { /* ... */ }
+.message-content-wrapper { /* ... */ }
+.message-wrapper.self .message-content-wrapper { /* ... */ }
+.message-wrapper.self .message-text { /* ... */ }
+.message-wrapper.peer .message-content-wrapper { /* ... */ }
+.message-sender { /* ... */ }
+.message-wrapper.peer .message-sender { /* ... */ }
+.message-timestamp { /* ... */ }
+.message-text { /* ... */ }
+.message-input-box { /* ... */ }
+.attach-button { /* ... */ }
+#message-input { /* ... */ }
+#message-input::placeholder { /* ... */ }
+.send-button { /* ... */ }
+.send-button:hover { /* ... */ }
+.no-chat-selected-view { /* ... */ }
+.no-chat-selected-view h2 { /* ... */ }
+
+/* General Button Styling */
+button { /* ... */ }
+.button-primary { /* ... */ }
+.button-primary:hover { /* ... */ }
+.button-secondary { /* ... */ }
+.button-secondary:hover { /* ... */ }
+.user-panel-button { /* Was for font toggle, now that's in settings modal */
+    display: none; /* Hide if not used elsewhere */
+}
+
+/* Auth View Specifics */
+.auth-box { max-width: 420px; }
+.auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid var(--tertiary-bg); }
+.tab-button { flex-grow: 1; padding: 10px 15px; background: none; border: none; border-bottom: 3px solid transparent; color: var(--text-muted); font-size: 1rem; font-weight: 500; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
+.tab-button:hover { color: var(--text-normal); }
+.tab-button.active { color: var(--primary-accent); border-bottom-color: var(--primary-accent); }
+.auth-tab-content { display: none; }
+.auth-tab-content.active-tab { display: block; }
+.auth-tab-content h2 { text-align: left; font-size: 1.3rem; margin-bottom: 15px; }
+.auth-tab-content form label { text-transform: none; font-size: var(--font-size-ui-small); color: var(--text-muted); margin-bottom: 4px; display: block; }
+.auth-tab-content form input[type="text"],
+.auth-tab-content form input[type="password"],
+.auth-tab-content form input[type="email"] { margin-bottom: 12px; font-size: var(--font-size-ui-normal); }
+.auth-tab-content form button[type="submit"] { margin-top: 10px; }
+.auth-options { margin-top: 15px; text-align: center; }
+.auth-options p { font-size: var(--font-size-ui-small); color: var(--text-muted); margin-bottom: 10px; }
+.auth-options .button-secondary { margin-bottom: 10px; }
+.profile-import-section p { font-size: var(--font-size-ui-small); }
+
+/* Settings Modal Specifics */
+.settings-box { max-width: 520px; text-align: left; }
+.settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--tertiary-bg); }
+.settings-header h2 { font-family: var(--font-display); color: var(--text-bright); font-size: var(--font-size-h2); margin-bottom: 0; text-align: left; }
+.modal-close-button { font-size: 1.2rem; padding: 5px; }
+.settings-content { max-height: 70vh; overflow-y: auto; padding-right: 10px; }
+.settings-section { margin-bottom: 25px; }
+.settings-section:last-child { margin-bottom: 0; }
+.settings-section h3 { font-family: var(--font-primary); font-weight: 600; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 15px; border-bottom: 1px solid var(--tertiary-bg); padding-bottom: 8px; }
+.setting-item { margin-bottom: 15px; display: flex; flex-direction: column; }
+.setting-item label:not(.file-input-label) { font-size: var(--font-size-ui-small); color: var(--text-muted); margin-bottom: 5px; font-weight: 500; text-transform: none; }
+.settings-value-display { font-size: var(--font-size-ui-normal); color: var(--text-normal); padding: 8px 0; word-break: break-all; }
+.settings-id-container { display: flex; align-items: center; font-size: var(--font-size-ui-normal); }
+.settings-id-container #settings-userid-display { flex-grow: 1; margin-right: 10px; }
+.settings-section .button-secondary,
+.settings-section .button-primary { width: 100%; margin-top: 5px; }
+.full-width-button { width: 100%; display: block; text-align: center; }
+.hidden-file-input { display: none; }
+.file-input-label { cursor: pointer; display: inline-block; padding: 10px 16px; }
+
+/* Profile Picture Preview in Settings */
+.profile-picture-preview-container {
+    width: 100px;
+    height: 100px;
+    border-radius: 25%; /* Squircle */
+    background-color: var(--tertiary-bg);
+    margin: 5px 0 10px 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--interactive-bg);
+}
+#profile-picture-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.avatar-placeholder { /* For the letter placeholder in preview */
+    font-size: 2.5rem;
+    color: var(--text-muted);
+    display: flex; /* Already flex by parent, but good for self-containment */
+    align-items: center;
+    justify-content: center;
+}
+.settings-input { /* Style for general text inputs within settings modal, like username change */
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: var(--border-radius-s);
+    border: 1px solid var(--tertiary-bg);
+    background-color: var(--input-bg);
+    color: var(--text-input);
+    font-size: var(--font-size-ui-normal);
+    margin-bottom: 5px;
+}
+.settings-input:focus {
+    outline: none;
+    border-color: var(--primary-accent);
+}
+
+
+.settings-select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: var(--border-radius-s);
+    border: 1px solid var(--tertiary-bg);
+    background-color: var(--input-bg);
+    color: var(--text-input);
+    font-size: var(--font-size-ui-normal);
+    margin-top: 4px;
+}
+.settings-select:focus {
+    outline: none;
+    border-color: var(--primary-accent);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar { /* ... */ }
+::-webkit-scrollbar-corner { /* ... */ }
+::-webkit-scrollbar-thumb { /* ... */ }
+::-webkit-scrollbar-track { /* ... */ }
+.dm-list::-webkit-scrollbar-track { /* ... */ }
+.dm-list::-webkit-scrollbar-thumb { /* ... */ }
+.hidden { display: none !important; }
+
+[end of p2p_chat/style.css]
